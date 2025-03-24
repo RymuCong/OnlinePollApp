@@ -16,7 +16,7 @@ public class Choice : Entity<Guid>
     public bool? IsCorrect { get; set; }
 
     [StringLength(255)]
-    public string MediaUrl { get; set; }
+    public string? MediaUrl { get; set; }
 
     public bool? IsActive { get; set; }
 

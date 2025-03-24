@@ -19,11 +19,11 @@ public static class DbInitializer
         {
             await context.Database.MigrateAsync();
             await SeedCommonSettings(context, logger);
+            var roles = await SeedRoles(context, logger);
+            var users = await SeedUsers(context, logger);
+            await SeedUserRoles(context, users, roles, logger);
             var paymentTerms = await SeedPaymentTerms(context, logger);
             var paymentMethods = await SeedPaymentMethods(context, logger);
-            await SeedChoices(context, logger);
-            await SeedQuestions(context, logger);
-            await SeedPolls(context, logger);
         }
         catch (Exception ex)
         {
@@ -127,6 +127,28 @@ public static class DbInitializer
         await context.SaveChangesAsync();
         return roles;
     }
+    
+    private static async Task<List<User>> SeedUsers(CrmDbContext context, ILogger<CrmDbContext> logger)
+    {
+        if (await context.Users.AnyAsync())
+            return await context.Users.ToListAsync();
+
+        logger.LogInformation("Seeding users...");
+        // var users = new List<User> { CreateAdminUser(departments[0].Id) }; // Admin thuộc Ban giám đốc
+        // users.AddRange(CreateManagerUsers(departments.Skip(1).ToList())); // Mỗi manager cho một phòng còn lại
+        var users = new List<User>
+        {
+            CreateAdminUser(Guid.NewGuid())
+        };
+        for (int i = 0; i < 5; i++)
+        {
+            users.Add(CreateManagerUser(Guid.NewGuid()));
+        }
+
+        await context.Users.AddRangeAsync(users);
+        await context.SaveChangesAsync();
+        return users;
+    }
 
     private static async Task SeedUserRoles(CrmDbContext context, List<User> users, List<Role> roles, ILogger<CrmDbContext> logger)
     {
@@ -208,55 +230,6 @@ public static class DbInitializer
         await context.PaymentMethods.AddRangeAsync(paymentMethods);
         await context.SaveChangesAsync();
         return paymentMethods;
-    }
-
-    private static async Task SeedChoices(CrmDbContext context, ILogger<CrmDbContext> logger)
-    {
-        if (await context.Choices.AnyAsync())
-            return;
-
-        logger.LogInformation("Seeding choices...");
-        var choices = new List<Choice>
-    {
-        new Choice { Id = Guid.NewGuid(), ChoiceText = "Choice 1" },
-        new Choice { Id = Guid.NewGuid(), ChoiceText = "Choice 2" },
-        new Choice { Id = Guid.NewGuid(), ChoiceText = "Choice 3" }
-    };
-
-        await context.Choices.AddRangeAsync(choices);
-        await context.SaveChangesAsync();
-    }
-
-    private static async Task SeedQuestions(CrmDbContext context, ILogger<CrmDbContext> logger)
-    {
-        if (await context.Questions.AnyAsync())
-            return;
-
-        logger.LogInformation("Seeding questions...");
-        var questions = new List<Question>
-    {
-        new Question { Id = Guid.NewGuid(), QuestionText = "Question 1" },
-        new Question { Id = Guid.NewGuid(), QuestionText = "Question 2" }
-    };
-
-        await context.Questions.AddRangeAsync(questions);
-        await context.SaveChangesAsync();
-    }
-
-    private static async Task SeedPolls(CrmDbContext context, ILogger<CrmDbContext> logger)
-    {
-        if (await context.Polls.AnyAsync())
-            return;
-
-        logger.LogInformation("Seeding polls...");
-        var polls = new List<Poll>
-    {
-        new Poll { Id = Guid.NewGuid(), Title = "Poll 1" },
-        new Poll { Id = Guid.NewGuid(), Title = "Poll 2" }
-    };
-
-        await context.Polls.AddRangeAsync(polls);
-        await context.SaveChangesAsync();
     }
 
     #region Helper Methods
