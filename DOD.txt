@@ -1,0 +1,25 @@
+DefinitionOfDone for BE
+	- Code & Logic
+		- Xử lý đầy đủ các case logic, edge cases và validation có trong tài liệu BA	
+		- Code tuân thủ kiến trúc và naming conversion của dự án
+	- API Development	
+		- API tuân theo RESTful và cách đặt tên đã quy định
+		- Mô tả chi tiết các API trên tài liệu	
+		- Đã deploy trên server, sẵn sàng cho tích hợp
+		- Tất cả các API GET đều phải có data trả ra
+	
+DefinitionOfDone for FE	
+	- UI
+		- UI đúng với figmal 
+		- UI tuân thủ design system
+		- Với các form nhập liệu, kiểm tra đầy đủ logic validate input
+		- Tái sử dụng các component dùng chung
+	- API Integration
+		- Kết nối API đúng contract với BE. Dữ liệu từ BE đươc hiển thị chính xác theo tài liệu BA
+		- Xử lý trạng thái loading (loading, error, success) đúng chuẩn (bật loading với các form nhiều thông tin, chậm)
+		- Có notification đầy đủ và đúng với message BA định nghĩa
+		- Kiểm thử với dữ liệu thực tế
+	- Testing	
+		- Chức năng phải hoạt động được trên UAT (đầy đủ từ UI đến giao diện)
+		- Đầy đủ phần routing (không fix cứng URL để test)
+		- Không có lỗi UI nghiêm trọng trên UAT

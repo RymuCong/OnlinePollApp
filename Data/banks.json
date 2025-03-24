@@ -1,0 +1,177 @@
+{
+  "banks": [
+    {
+      "code": "VCB",
+      "name": "Ngân hàng TMCP Ngoại Thương Việt Nam",
+      "shortName": "Vietcombank",
+      "logo": "vcb-logo.png",
+      "swiftCode": "BFTVVNVX",
+      "website": "https://www.vietcombank.com.vn",
+      "branches": [
+        {
+          "code": "VCB001",
+          "name": "Chi nhánh Hoàn Kiếm",
+          "address": "23 Phan Chu Trinh",
+          "province": "Hà Nội",
+          "district": "Hoàn Kiếm",
+          "phoneNumber": "024.38243524",
+          "email": "hoankiem.hanoi@vietcombank.com.vn",
+          "workingHours": "8:00 - 17:00",
+          "branchType": 1,
+          "managerName": "Nguyễn Văn A",
+          "latitude": "21.025874",
+          "longitude": "105.853312"
+        },
+        {
+          "code": "VCB002",
+          "name": "Chi nhánh Hà Thành",
+          "address": "344 Bà Triệu",
+          "province": "Hà Nội",
+          "district": "Hai Bà Trưng"
+        }
+      ]
+    },
+    {
+      "code": "TCB",
+      "name": "Ngân hàng TMCP Kỹ Thương Việt Nam",
+      "shortName": "Techcombank",
+      "logo": "tcb-logo.png",
+      "branches": [
+        {
+          "code": "TCB001",
+          "name": "Chi nhánh Hoàn Kiếm",
+          "address": "45 Lý Thái Tổ",
+          "province": "Hà Nội",
+          "district": "Hoàn Kiếm"
+        },
+        {
+          "code": "TCB002",
+          "name": "Chi nhánh Đống Đa",
+          "address": "191 Khâm Thiên",
+          "province": "Hà Nội",
+          "district": "Đống Đa"
+        }
+      ]
+    },
+    {
+      "code": "BIDV",
+      "name": "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam",
+      "shortName": "BIDV",
+      "logo": "bidv-logo.png",
+      "swiftCode": "BIDVVNVX",
+      "website": "https://www.bidv.com.vn",
+      "branches": [
+        {
+          "code": "BIDV001",
+          "name": "Chi nhánh Sở Giao dịch 1",
+          "address": "194 Trần Quang Khải",
+          "province": "Hà Nội",
+          "district": "Hoàn Kiếm",
+          "phoneNumber": "024.39362086",
+          "email": "info@bidv.com.vn",
+          "workingHours": "8:00 - 17:00",
+          "branchType": 1,
+          "managerName": "Nguyễn Văn B",
+          "latitude": "21.025874",
+          "longitude": "105.853312"
+        }
+      ]
+    },
+    {
+      "code": "MB",
+      "name": "Ngân hàng TMCP Quân đội",
+      "shortName": "MB Bank",
+      "logo": "mb-logo.png",
+      "swiftCode": "MSCBVNVX",
+      "website": "https://www.mbbank.com.vn",
+      "branches": [
+        {
+          "code": "MB001",
+          "name": "Chi nhánh Điện Biên Phủ",
+          "address": "519 Điện Biên Phủ",
+          "province": "Hồ Chí Minh",
+          "district": "Bình Thạnh",
+          "phoneNumber": "028.38405043",
+          "email": "mb.dbp@mbbank.com.vn",
+          "workingHours": "8:00 - 17:00",
+          "branchType": 1,
+          "managerName": "Trần Văn C",
+          "latitude": "10.801773",
+          "longitude": "106.701115"
+        }
+      ]
+    },
+    {
+      "code": "AGR",
+      "name": "Ngân hàng Nông nghiệp và Phát triển Nông thôn Việt Nam",
+      "shortName": "Agribank",
+      "logo": "agribank-logo.png",
+      "swiftCode": "VBAAVNVX",
+      "website": "https://www.agribank.com.vn",
+      "branches": [
+        {
+          "code": "AGR001",
+          "name": "Chi nhánh Láng Hạ",
+          "address": "24 Láng Hạ",
+          "province": "Hà Nội",
+          "district": "Đống Đa",
+          "phoneNumber": "024.37765055",
+          "email": "agribank.langha@agribank.com.vn",
+          "workingHours": "8:00 - 17:00",
+          "branchType": 1,
+          "managerName": "Lê Văn D",
+          "latitude": "21.019622",
+          "longitude": "105.809889"
+        }
+      ]
+    },
+    {
+      "code": "STB",
+      "name": "Ngân hàng TMCP Sài Gòn Thương Tín",
+      "shortName": "Sacombank",
+      "logo": "sacombank-logo.png",
+      "swiftCode": "SGTTVNVX",
+      "website": "https://www.sacombank.com.vn",
+      "branches": [
+        {
+          "code": "STB001",
+          "name": "Chi nhánh Nguyễn Văn Trỗi",
+          "address": "130 Nguyễn Văn Trỗi",
+          "province": "Hồ Chí Minh",
+          "district": "Phú Nhuận",
+          "phoneNumber": "028.38479395",
+          "email": "nvtroi@sacombank.com",
+          "workingHours": "8:00 - 16:30",
+          "branchType": 1,
+          "managerName": "Phạm Văn E",
+          "latitude": "10.798876",
+          "longitude": "106.674584"
+        }
+      ]
+    },
+    {
+      "code": "ACB",
+      "name": "Ngân hàng TMCP Á Châu",
+      "shortName": "ACB",
+      "logo": "acb-logo.png",
+      "swiftCode": "ASCBVNVX",
+      "website": "https://www.acb.com.vn",
+      "branches": [
+        {
+          "code": "ACB001",
+          "name": "Chi nhánh Chợ Lớn",
+          "address": "927 Trần Hưng Đạo",
+          "province": "Hồ Chí Minh",
+          "district": "Quận 5",
+          "phoneNumber": "028.39234578",
+          "email": "cholon@acb.com.vn",
+          "workingHours": "8:00 - 16:30",
+          "branchType": 1,
+          "managerName": "Trần Văn F",
+          "latitude": "10.753254",
+          "longitude": "106.658741"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\CrossCuttingConcerns\T3H.Poll.CrossCuttingConcerns\T3H.Poll.CrossCuttingConcerns.csproj" />
+	  <ProjectReference Include="..\T3H.Poll.Domain\T3H.Poll.Domain.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Supplier\Commands\" />
+	  <Folder Include="Supplier\DTOs\" />
+	  <Folder Include="Supplier\EventHandlers\" />
+	  <Folder Include="Supplier\Queries\" />
+	  <Folder Include="Supplier\Services\" />
+	</ItemGroup>
+	
+
+</Project>
+
