@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Domain.Events;
+﻿namespace T3H.Poll.Domain.Events;
 
 public class EntityDeletedEvent<T> : IDomainEvent
  where T : Entity<Guid>

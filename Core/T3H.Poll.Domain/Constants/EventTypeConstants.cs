@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FDS.CRM.Domain.Constants
+namespace T3H.Poll.Domain.Constants
 {
     public class EventTypeConstants
     {

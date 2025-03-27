@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace FDS.CRM.Domain.Entities;
+namespace T3H.Poll.Domain.Entities;
 
 public class PasswordHistory : Entity<Guid>
 {

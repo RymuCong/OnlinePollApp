@@ -1,5 +1,5 @@
-﻿using FDS.CRM.Application.Common.DTOs;
-namespace FDS.CRM.Application.Users.Queries;
+﻿using T3H.Poll.Application.Common.DTOs;
+namespace T3H.Poll.Application.Users.Queries;
 
 public class GetUsersByNameQuery : IQuery<ResultModel<List<SearchUserResponse>>>
 {

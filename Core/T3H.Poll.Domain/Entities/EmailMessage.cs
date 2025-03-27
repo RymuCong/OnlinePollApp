@@ -1,6 +1,6 @@
-﻿using FDS.CRM.Domain.Notification;
+﻿using T3H.Poll.Domain.Notification;
 
-namespace FDS.CRM.Domain.Entities;
+namespace T3H.Poll.Domain.Entities;
 
 public class EmailMessage : EmailMessageBase, IAggregateRoot, IEmailMessage
 {

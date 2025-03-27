@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace FDS.CRM.Domain.Entities
+namespace T3H.Poll.Domain.Entities
 {
     public class VotingHistory : Entity<Guid>
     {

@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.WebApi.Models.Roles;
+﻿namespace T3H.Poll.WebApi.Models.Roles;
 
 public static class RoleModelMappingConfiguration
 {

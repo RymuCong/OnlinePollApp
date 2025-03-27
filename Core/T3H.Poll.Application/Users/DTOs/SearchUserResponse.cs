@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Application.Users.DTOs;
+﻿namespace T3H.Poll.Application.Users.DTOs;
 
 public class SearchUserResponse
 {

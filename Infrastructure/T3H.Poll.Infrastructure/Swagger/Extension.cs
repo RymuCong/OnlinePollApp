@@ -1,10 +1,10 @@
 ﻿
-using FDS.CRM.Infrastructure.Swagger;
+using T3H.Poll.Infrastructure.Swagger;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.PlatformAbstractions;
 
-namespace FDS.CRM.Infrastructure.Swagger;
+namespace T3H.Poll.Infrastructure.Swagger;
 
 public static class Extentions
 {

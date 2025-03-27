@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.CrossCuttingConcerns.Locks;
+﻿namespace T3H.Poll.CrossCuttingConcerns.Locks;
 
 public class CouldNotAcquireLockException : Exception
 {

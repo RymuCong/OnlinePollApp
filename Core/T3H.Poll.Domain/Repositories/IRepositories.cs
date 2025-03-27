@@ -1,6 +1,6 @@
 ﻿
 
-namespace FDS.CRM.Domain.Repositories
+namespace T3H.Poll.Domain.Repositories
 {
     public interface IRepository<TEntity, TKey> : IConcurrencyHandler<TEntity>
      where TEntity : Entity<TKey>, IAggregateRoot

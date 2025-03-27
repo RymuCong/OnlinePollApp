@@ -1,8 +1,8 @@
 ﻿using CryptographyHelper.Certificates;
-using FDS.CRM.Infrastructure.Interceptors;
-using FDS.CRM.Infrastructure.Logging;
+using T3H.Poll.Infrastructure.Interceptors;
+using T3H.Poll.Infrastructure.Logging;
 
-namespace FDS.CRM.WebApi.ConfigurationOptions
+namespace T3H.Poll.WebApi.ConfigurationOptions
 {
     public class AppSettings
     {

@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Application.Common.DTOs;
+﻿namespace T3H.Poll.Application.Common.DTOs;
 
 public record ResultModel<T>(T Data, bool IsError = false, string ErrorMessage = default!, int Status = 200) where T : notnull
 {

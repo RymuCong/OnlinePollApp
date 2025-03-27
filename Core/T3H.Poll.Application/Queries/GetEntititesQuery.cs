@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Application.Queries;
+﻿namespace T3H.Poll.Application.Queries;
 
 public class GetEntititesQuery<TEntity> : IQuery<List<TEntity>>
  where TEntity : Entity<Guid>, IAggregateRoot

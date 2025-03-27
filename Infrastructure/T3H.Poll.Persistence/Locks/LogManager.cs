@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Persistence.Locks;
+﻿namespace T3H.Poll.Persistence.Locks;
 
 public class LockManager : ILockManager
 {

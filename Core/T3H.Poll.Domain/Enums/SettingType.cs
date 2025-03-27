@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace FDS.CRM.Domain.Enums;
+namespace T3H.Poll.Domain.Enums;
 
 public enum SettingType
 {

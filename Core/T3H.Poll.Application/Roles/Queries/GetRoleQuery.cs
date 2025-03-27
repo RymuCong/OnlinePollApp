@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Application.Roles.Queries;
+﻿namespace T3H.Poll.Application.Roles.Queries;
 
 public class GetRoleQuery : IQuery<Role>
 {

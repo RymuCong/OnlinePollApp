@@ -1,6 +1,6 @@
-﻿using FDS.CRM.Application.Common.Services;
+﻿using T3H.Poll.Application.Common.Services;
 
-namespace FDS.CRM.Application.Common.Commands;
+namespace T3H.Poll.Application.Common.Commands;
 
 public class AddOrUpdateEntityCommand<TEntity> : ICommand
 where TEntity : Entity<Guid>, IAggregateRoot

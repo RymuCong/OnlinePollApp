@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Application.Common.Commands;
+﻿namespace T3H.Poll.Application.Common.Commands;
 
 public interface ICommand
 {

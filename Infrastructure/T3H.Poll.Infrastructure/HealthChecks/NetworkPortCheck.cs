@@ -1,7 +1,7 @@
 ﻿using System.Net.Sockets;
 using System.Threading;
 
-namespace FDS.CRM.Infrastructure.HealthChecks;
+namespace T3H.Poll.Infrastructure.HealthChecks;
 
 public class NetworkPortCheck
 {

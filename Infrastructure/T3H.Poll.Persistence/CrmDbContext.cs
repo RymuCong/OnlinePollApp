@@ -1,7 +1,7 @@
-﻿using FDS.CRM.Domain.Entities;
+﻿using T3H.Poll.Domain.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace FDS.CRM.Persistence;
+namespace T3H.Poll.Persistence;
 
 public class CrmDbContext : DbContext, IUnitOfWork, IDataProtectionKeyContext
 {
@@ -19,7 +19,7 @@ public class CrmDbContext : DbContext, IUnitOfWork, IDataProtectionKeyContext
     public DbSet<PaymentTerm> PaymentTerms { get; set; }
     public DbSet<Choice> Choices { get; set; }
     public DbSet<Question> Questions { get; set; }
-    public DbSet<Poll> Polls { get; set; }
+    public DbSet<Domain.Entities.Poll> Polls { get; set; }
     public DbSet<PollAnalytics> PollAnalytics { get; set; }
     public DbSet<PollInvitation> PollInvitations { get; set; }
     public DbSet<VoteDetail> VoteDetails { get; set; }

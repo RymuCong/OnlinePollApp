@@ -1,6 +1,6 @@
 ﻿using Activity = System.Diagnostics.Activity;
 
-namespace FDS.CRM.Infrastructure.Logging;
+namespace T3H.Poll.Infrastructure.Logging;
 
 public class ActivityEnricher : ILogEventEnricher
 {

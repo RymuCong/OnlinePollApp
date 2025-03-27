@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Application.Users.Services;
+﻿namespace T3H.Poll.Application.Users.Services;
 
 public interface IUserService : ICrudService<User>
 {

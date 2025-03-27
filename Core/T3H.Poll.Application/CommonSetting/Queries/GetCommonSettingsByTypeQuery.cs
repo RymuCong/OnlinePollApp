@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Application.CommonSetting.Queries;
+﻿namespace T3H.Poll.Application.CommonSetting.Queries;
 public class GetCommonSettingsByTypeQuery : IQuery<List<CommonSettingDto>>
 {
     public GetCommonSettingsByTypeQuery()

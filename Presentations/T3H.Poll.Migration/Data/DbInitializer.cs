@@ -1,11 +1,11 @@
 ﻿using Bogus;
-using FDS.CRM.Domain.Entities;
-using FDS.CRM.Persistence;
+using T3H.Poll.Domain.Entities;
+using T3H.Poll.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using FDS.CRM.Domain.Enums;
+using T3H.Poll.Domain.Enums;
 
-namespace FDS.CRM.Migration.Data;
+namespace T3H.Poll.Migration.Data;
 
 public static class DbInitializer
 {
@@ -261,7 +261,6 @@ public static class DbInitializer
     {
         var user = new User
         {
-           
             UserName = Faker.Internet.UserName(),
             Email = Faker.Internet.Email(),
             FullName = Faker.Name.FullName(),

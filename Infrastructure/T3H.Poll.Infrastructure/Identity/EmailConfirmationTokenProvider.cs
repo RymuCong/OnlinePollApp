@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
 
-namespace FDS.CRM.Infrastructure.Identity;
+namespace T3H.Poll.Infrastructure.Identity;
 
 public class EmailConfirmationTokenProvider<TUser> : DataProtectorTokenProvider<TUser>
     where TUser : class

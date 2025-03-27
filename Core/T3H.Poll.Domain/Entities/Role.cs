@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FDS.CRM.Domain.Entities;
+namespace T3H.Poll.Domain.Entities;
 
 public class Role : Entity<Guid>, IAggregateRoot
 {

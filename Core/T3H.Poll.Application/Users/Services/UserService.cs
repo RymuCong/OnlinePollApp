@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Application.Users.Services;
+﻿namespace T3H.Poll.Application.Users.Services;
 
 public class UserService : CrudService<User>, IUserService
 {

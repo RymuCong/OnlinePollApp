@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace FDS.CRM.Persistence.MappingConfigurations;
+namespace T3H.Poll.Persistence.MappingConfigurations;
 
 public class UserRoleConfiguration : IEntityTypeConfiguration<UserRole>
 {

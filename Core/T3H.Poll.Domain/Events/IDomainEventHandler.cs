@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Domain.Events;
+﻿namespace T3H.Poll.Domain.Events;
 
 public interface IDomainEventHandler<T>
     where T : IDomainEvent

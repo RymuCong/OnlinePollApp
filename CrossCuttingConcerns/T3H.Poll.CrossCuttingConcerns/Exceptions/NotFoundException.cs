@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.CrossCuttingConcerns.Exceptions;
+﻿namespace T3H.Poll.CrossCuttingConcerns.Exceptions;
 
 public class NotFoundException : Exception
 {

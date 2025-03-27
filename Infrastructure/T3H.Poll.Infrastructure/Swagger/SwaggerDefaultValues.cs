@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Infrastructure.Swagger;
+﻿namespace T3H.Poll.Infrastructure.Swagger;
 
 public class SwaggerDefaultValues : IOperationFilter
 {

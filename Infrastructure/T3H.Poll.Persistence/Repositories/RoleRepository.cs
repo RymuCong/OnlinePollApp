@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Persistence.Repositories;
+﻿namespace T3H.Poll.Persistence.Repositories;
 
 public class RoleRepository : Repository<Role, Guid>, IRoleRepository
 {

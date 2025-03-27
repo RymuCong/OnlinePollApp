@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Infrastructure.Web.ExceptionHandlers;
+﻿namespace T3H.Poll.Infrastructure.Web.ExceptionHandlers;
 
 public class GlobalExceptionHandlerOptions
 {

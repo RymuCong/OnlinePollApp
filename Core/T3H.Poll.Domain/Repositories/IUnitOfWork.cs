@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Domain.Repositories;
+﻿namespace T3H.Poll.Domain.Repositories;
 
 public interface IUnitOfWork
 {

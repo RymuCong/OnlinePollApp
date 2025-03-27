@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Application.Users.Queries;
+﻿namespace T3H.Poll.Application.Users.Queries;
 
 public class GetUserQuery : IQuery<User>
 {

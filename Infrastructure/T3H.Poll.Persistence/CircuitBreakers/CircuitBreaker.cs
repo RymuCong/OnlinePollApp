@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Persistence.CircuitBreakers;
+﻿namespace T3H.Poll.Persistence.CircuitBreakers;
 
 public class CircuitBreaker : ICircuitBreaker
 {

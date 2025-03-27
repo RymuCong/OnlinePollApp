@@ -1,6 +1,6 @@
 ﻿using CryptographyHelper.Certificates;
 
-namespace FDS.CRM.WebApi.ConfigurationOptions;
+namespace T3H.Poll.WebApi.ConfigurationOptions;
 
 public class CertificatesOptions
 {

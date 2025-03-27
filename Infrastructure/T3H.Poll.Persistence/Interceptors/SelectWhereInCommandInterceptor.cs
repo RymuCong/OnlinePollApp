@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Persistence.Interceptors;
+﻿namespace T3H.Poll.Persistence.Interceptors;
 
 public class SelectWhereInCommandInterceptor : DbCommandInterceptor
 {

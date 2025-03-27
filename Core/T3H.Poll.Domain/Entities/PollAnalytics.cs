@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Domain.Entities;
+﻿namespace T3H.Poll.Domain.Entities;
 
 using System;
 using System.ComponentModel.DataAnnotations.Schema;

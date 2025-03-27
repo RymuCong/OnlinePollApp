@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Application.PurchaseTransaction;
+﻿namespace T3H.Poll.Application.PurchaseTransaction;
 public class PurchaseTransactionDto
 {
     public Guid BuyPaymentMethodId { get; set; }

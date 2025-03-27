@@ -1,7 +1,7 @@
-﻿using FDS.CRM.Infrastructure.Logging;
+﻿using T3H.Poll.Infrastructure.Logging;
 using Activity = System.Diagnostics.Activity;
 
-namespace FDS.CRM.Infrastructure.Web.ExceptionHandlers;
+namespace T3H.Poll.Infrastructure.Web.ExceptionHandlers;
 
 public class GlobalExceptionHandler : IExceptionHandler
 {

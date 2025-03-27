@@ -1,9 +1,9 @@
-﻿using FDS.CRM.Domain.Identity;
+﻿using T3H.Poll.Domain.Identity;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Security.Claims;
 
-namespace FDS.CRM.Infrastructure.Identity;
+namespace T3H.Poll.Infrastructure.Identity;
 
 public class CurrentWebUser : ICurrentUser
 {

@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Persistence.Repositories;
+﻿namespace T3H.Poll.Persistence.Repositories;
 
 public class Repository<T, TKey> : IRepository<T, TKey>
 where T : Entity<TKey>, IAggregateRoot

@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Application.CommonSetting.DTOs;
+﻿namespace T3H.Poll.Application.CommonSetting.DTOs;
 public class CommonSettingDto
 {
     public Guid Id { get; set; }

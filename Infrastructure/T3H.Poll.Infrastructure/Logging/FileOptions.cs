@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Infrastructure.Logging;
+﻿namespace T3H.Poll.Infrastructure.Logging;
 
 public class FileOptions
 {

@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Domain.Specification;
+﻿namespace T3H.Poll.Domain.Specification;
 
 public abstract class BaseSpecification<T> : ISpecification<T>
 {

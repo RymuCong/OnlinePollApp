@@ -1,11 +1,11 @@
 ﻿
-using FDS.CRM.Application.Common.Commands;
-using FDS.CRM.Application.Users.Commands;
-using FDS.CRM.Application.Users.Queries;
-using FDS.CRM.CrossCuttingConcerns.ExtensionMethods;
-using FDS.CRM.WebApi.Models.Users;
+using T3H.Poll.Application.Common.Commands;
+using T3H.Poll.Application.Users.Commands;
+using T3H.Poll.Application.Users.Queries;
+using T3H.Poll.CrossCuttingConcerns.ExtensionMethods;
+using T3H.Poll.WebApi.Models.Users;
 
-namespace FDS.CRM.WebApi.Controllers.V1;
+namespace T3H.Poll.WebApi.Controllers.V1;
 
 [EnableRateLimiting(RateLimiterPolicyNames.DefaultPolicy)]
 // [Authorize]

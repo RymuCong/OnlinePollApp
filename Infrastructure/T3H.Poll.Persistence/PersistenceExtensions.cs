@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 
-namespace FDS.CRM.Persistence;
+namespace T3H.Poll.Persistence;
 
 public static class PersistenceExtensions
 {

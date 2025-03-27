@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.CrossCuttingConcerns.ExtensionMethods;
+﻿namespace T3H.Poll.CrossCuttingConcerns.ExtensionMethods;
 
 public static class EnumerableExtension
 {

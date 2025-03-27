@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Persistence.Repositories;
+﻿namespace T3H.Poll.Persistence.Repositories;
     public class CommonSettingRepository : Repository<CommonSetting, Guid>, ICommonSettingRepository
 {
     public CommonSettingRepository(CrmDbContext dbContext, IDateTimeProvider dateTimeProvider) : base(dbContext, dateTimeProvider)

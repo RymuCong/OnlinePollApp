@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Domain.Entities;
+﻿namespace T3H.Poll.Domain.Entities;
 
 // điều khoản thanh toán
 public class PaymentTerm : Entity<Guid>

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FDS.CRM.Persistence.CircuitBreakers
+namespace T3H.Poll.Persistence.CircuitBreakers
 {
     internal class CircuitBreakerManager
     {

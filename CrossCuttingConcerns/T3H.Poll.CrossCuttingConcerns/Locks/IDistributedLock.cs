@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.CrossCuttingConcerns.Locks;
+﻿namespace T3H.Poll.CrossCuttingConcerns.Locks;
 
 public interface IDistributedLock : IDisposable
 {

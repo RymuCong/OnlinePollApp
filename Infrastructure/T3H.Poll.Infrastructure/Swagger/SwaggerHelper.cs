@@ -1,7 +1,7 @@
 ﻿using Microsoft.OpenApi.Any;
-using static FDS.CRM.Infrastructure.Swagger.SwaggerConfig;
+using static T3H.Poll.Infrastructure.Swagger.SwaggerConfig;
 
-namespace FDS.CRM.Infrastructure.Swagger;
+namespace T3H.Poll.Infrastructure.Swagger;
 
 public class SwaggerConfig
 {

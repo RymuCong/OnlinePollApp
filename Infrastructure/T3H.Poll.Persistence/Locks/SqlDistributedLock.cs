@@ -1,6 +1,6 @@
 ﻿using EntityFrameworkCore.SqlServer.SimpleBulks.Extensions;
 
-namespace FDS.CRM.Persistence.Locks;
+namespace T3H.Poll.Persistence.Locks;
 
 public class SqlDistributedLock : IDistributedLock
 {

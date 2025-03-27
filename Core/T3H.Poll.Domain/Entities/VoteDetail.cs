@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace FDS.CRM.Domain.Entities;
+namespace T3H.Poll.Domain.Entities;
 
 public class VoteDetail : Entity<Guid>
 {

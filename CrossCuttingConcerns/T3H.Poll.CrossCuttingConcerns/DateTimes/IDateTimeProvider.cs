@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.CrossCuttingConcerns.DateTimes;
+﻿namespace T3H.Poll.CrossCuttingConcerns.DateTimes;
 
 public interface IDateTimeProvider
 {

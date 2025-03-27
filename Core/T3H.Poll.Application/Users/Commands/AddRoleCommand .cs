@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Application.Users.Commands;
+﻿namespace T3H.Poll.Application.Users.Commands;
 
 public class AddRoleCommand : ICommand
 {

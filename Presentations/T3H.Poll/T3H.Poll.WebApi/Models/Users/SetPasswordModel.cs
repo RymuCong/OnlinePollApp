@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FDS.CRM.WebApi.Models.Users;
+namespace T3H.Poll.WebApi.Models.Users;
 
 public class SetPasswordModel
 {

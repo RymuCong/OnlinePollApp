@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace FDS.CRM.Infrastructure.Identity;
+namespace T3H.Poll.Infrastructure.Identity;
 
 public class UserStore : IUserStore<User>,
                          IUserPasswordStore<User>,

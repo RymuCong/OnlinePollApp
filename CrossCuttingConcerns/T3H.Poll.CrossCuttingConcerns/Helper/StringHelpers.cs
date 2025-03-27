@@ -1,10 +1,10 @@
-﻿using FDS.CRM.CrossCuttingConcerns.ExtensionMethods;
+﻿using T3H.Poll.CrossCuttingConcerns.ExtensionMethods;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace FDS.CRM.CrossCuttingConcerns.Helper
+namespace T3H.Poll.CrossCuttingConcerns.Helper
 {
     public static class StringHelpers
     {

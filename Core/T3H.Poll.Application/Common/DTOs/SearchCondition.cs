@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Application.Common.DTOs;
+﻿namespace T3H.Poll.Application.Common.DTOs;
 
 public class SearchCondition
 {

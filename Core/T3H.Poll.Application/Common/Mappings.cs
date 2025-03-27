@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Application.Common;
+﻿namespace T3H.Poll.Application.Common;
 
 public static class Mappings
 {

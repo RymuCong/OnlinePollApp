@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.CrossCuttingConcerns.CircuitBreaker;
+﻿namespace T3H.Poll.CrossCuttingConcerns.CircuitBreaker;
 
 public class CircuitBreakerOpenException : Exception
 {

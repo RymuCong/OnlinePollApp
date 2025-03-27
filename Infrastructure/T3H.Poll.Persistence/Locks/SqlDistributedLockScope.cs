@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FDS.CRM.Persistence.Locks;
+namespace T3H.Poll.Persistence.Locks;
 
 public class SqlDistributedLockScope : IDistributedLockScope
 {

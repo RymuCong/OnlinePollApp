@@ -1,7 +1,7 @@
-﻿using FDS.CRM.Application.Common;
-using FDS.CRM.Application.Common.Services;
+﻿using T3H.Poll.Application.Common;
+using T3H.Poll.Application.Common.Services;
 
-namespace FDS.CRM.Application;
+namespace T3H.Poll.Application;
 
 public static class ApplicationServicesExtensions
 {

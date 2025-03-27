@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Application.Queries;
+﻿namespace T3H.Poll.Application.Queries;
 
 public interface IQueryHandler<TQuery, TResult>
   where TQuery : IQuery<TResult>

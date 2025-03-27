@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.WebApi.Authorization;
+﻿namespace T3H.Poll.WebApi.Authorization;
 
 public static class AuthorizationPolicyNames
 {

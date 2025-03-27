@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FDS.CRM.Domain.Identity;
+namespace T3H.Poll.Domain.Identity;
 
 public interface ICurrentUser
 {

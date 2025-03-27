@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace FDS.CRM.Application.Common.Services;
+namespace T3H.Poll.Application.Common.Services;
 
 public class CrudService<T> : ICrudService<T> where T : Entity<Guid>, IAggregateRoot
 {

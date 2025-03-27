@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Infrastructure.Swagger;
+﻿namespace T3H.Poll.Infrastructure.Swagger;
 
 /// <summary>
 /// Add extra parameters for uploading files in swagger.

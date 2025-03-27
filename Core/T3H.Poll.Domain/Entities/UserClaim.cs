@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FDS.CRM.Domain.Entities;
+namespace T3H.Poll.Domain.Entities;
 
 public class UserClaim : Entity<Guid>
 {

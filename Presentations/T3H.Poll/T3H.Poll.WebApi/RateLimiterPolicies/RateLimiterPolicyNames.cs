@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.WebApi.RateLimiterPolicies
+﻿namespace T3H.Poll.WebApi.RateLimiterPolicies
 {
     public static class RateLimiterPolicyNames
     {

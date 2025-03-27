@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Domain.Events;
+﻿namespace T3H.Poll.Domain.Events;
 
 public class EntityUpdatedEvent<T> : IDomainEvent
  where T : Entity<Guid>

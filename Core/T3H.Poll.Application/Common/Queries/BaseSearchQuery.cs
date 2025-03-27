@@ -1,9 +1,9 @@
-﻿using FDS.CRM.Application.Common.DTOs;
-using FDS.CRM.Application.Common.Services;
+﻿using T3H.Poll.Application.Common.DTOs;
+using T3H.Poll.Application.Common.Services;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 
-namespace FDS.CRM.Application.Common.Queries
+namespace T3H.Poll.Application.Common.Queries
 {
     public abstract class BaseSearchQuery<TEntity, TResult> : IQuery<SearchResponseModel<TResult>>
          where TEntity  : Entity<Guid>, IAggregateRoot

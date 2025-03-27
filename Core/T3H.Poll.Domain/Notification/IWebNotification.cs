@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace FDS.CRM.Domain.Notification;
+namespace T3H.Poll.Domain.Notification;
 
 public interface IWebNotification<T>
 {

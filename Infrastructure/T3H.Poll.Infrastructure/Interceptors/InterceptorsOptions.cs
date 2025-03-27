@@ -1,4 +1,4 @@
-﻿namespace FDS.CRM.Infrastructure.Interceptors;
+﻿namespace T3H.Poll.Infrastructure.Interceptors;
 
 public class InterceptorsOptions
 {

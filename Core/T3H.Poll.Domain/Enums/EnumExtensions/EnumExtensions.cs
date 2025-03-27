@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace FDS.CRM.Domain.Enums.EnumExtensions
+namespace T3H.Poll.Domain.Enums.EnumExtensions
 {
     public static class EnumExtensions
     {
