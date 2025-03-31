@@ -10,7 +10,7 @@ public class Poll : Entity<Guid>, IAggregateRoot
     [StringLength(255)]
     public string Title { get; set; }
 
-    public string Description { get; set; }
+    public string? Description { get; set; }
 
     public DateTime StartTime { get; set; }
 
@@ -26,16 +26,16 @@ public class Poll : Entity<Guid>, IAggregateRoot
 
     public bool IsPublic { get; set; }
 
-    public string AccessCode { get; set; }
+    public string? AccessCode { get; set; }
 
-    public string ThemeSettings { get; set; }
+    public string? ThemeSettings { get; set; }
 
     [StringLength(20)]
-    public string VotingFrequencyControl { get; set; }
+    public string? VotingFrequencyControl { get; set; }
 
     public int VotingCooldownMinutes { get; set; }
 
-    public List<Question> Questions { get; set; }
+    public List<Question> Questions { get; set; } = new List<Question>();
     
     #region Business Logic
     public static Poll Create(string title, string description, DateTime startTime, DateTime? endTime, bool isActive, bool isAnonymous, bool isMultipleVotesAllowed, bool isViewableByModerator, bool isPublic, string accessCode, string votingFrequencyControl, int votingCooldownMinutes)
