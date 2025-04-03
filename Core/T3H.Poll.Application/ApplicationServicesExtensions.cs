@@ -1,31 +1,33 @@
 ﻿using T3H.Poll.Application.Common;
 using T3H.Poll.Application.Common.Services;
+using T3H.Poll.Application.Polls.Services;
 
 namespace T3H.Poll.Application;
 
 public static class ApplicationServicesExtensions
 {
-    //public static IServiceCollection AddApplicationServices(this IServiceCollection services, Action<Type, Type, ServiceLifetime> configureInterceptor = null)
-    //{
-    //    services.AddScoped(typeof(ICrudService<>), typeof(CrudService<>))
-    //        // .AddScoped<IUserService, UserService>()
-    //        .AddScoped<IProductService, ProductService>()
-    //        .AddScoped<IContactService, ContactService>();
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services, Action<Type, Type, ServiceLifetime> configureInterceptor = null)
+    {
+        services.AddScoped(typeof(ICrudService<>), typeof(CrudService<>))
+            .AddScoped<IPollService, PollService>();
+            // .AddScoped<IUserService, UserService>()
+            // .AddScoped<IProductService, ProductService>()
+            // .AddScoped<IContactService, ContactService>();
 
-    //    if (configureInterceptor != null)
-    //    {
-    //        var aggregateRootTypes = typeof(IAggregateRoot).Assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(Entity<Guid>)) && x.GetInterfaces().Contains(typeof(IAggregateRoot))).ToList();
-    //        foreach (var type in aggregateRootTypes)
-    //        {
-    //            configureInterceptor(typeof(ICrudService<>).MakeGenericType(type), typeof(CrudService<>).MakeGenericType(type), ServiceLifetime.Scoped);
-    //        }
+        if (configureInterceptor != null)
+        {
+            var aggregateRootTypes = typeof(IAggregateRoot).Assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(Entity<Guid>)) && x.GetInterfaces().Contains(typeof(IAggregateRoot))).ToList();
+            foreach (var type in aggregateRootTypes)
+            {
+                configureInterceptor(typeof(ICrudService<>).MakeGenericType(type), typeof(CrudService<>).MakeGenericType(type), ServiceLifetime.Scoped);
+            }
 
-    //        // configureInterceptor(typeof(IUserService), typeof(UserService), ServiceLifetime.Scoped);
-    //        configureInterceptor(typeof(IProductService), typeof(ProductService), ServiceLifetime.Scoped);
-    //    }
+            // configureInterceptor(typeof(IUserService), typeof(UserService), ServiceLifetime.Scoped);
+            // configureInterceptor(typeof(IProductService), typeof(ProductService), ServiceLifetime.Scoped);
+        }
 
-    //    return services;
-    //}
+        return services;
+    }
 
     public static IServiceCollection AddMessageHandlers(this IServiceCollection services)
     {

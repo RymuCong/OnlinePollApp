@@ -42,6 +42,7 @@ public class Poll : Entity<Guid>, IAggregateRoot
     {
         return new Poll
         {
+            Id = Guid.NewGuid(),
             Title = title,
             Description = description,
             StartTime = startTime,

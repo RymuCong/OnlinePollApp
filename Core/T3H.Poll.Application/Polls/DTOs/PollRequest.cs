@@ -1,8 +1,7 @@
 ﻿namespace T3H.Poll.Application.Polls.DTOs;
 
-public class PollDto
+public class PollRequest
 {
-    public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public DateTime StartTime { get; set; }
@@ -15,9 +14,4 @@ public class PollDto
     public string? AccessCode { get; set; }
     public string? VotingFrequencyControl { get; set; }
     public int VotingCooldownMinutes { get; set; }
-    public DateTime CreatedDateTime { get; set; }
-    public DateTime UpdatedDateTime { get; set; }
-    public string? UserNameUpdated { get; set; }
-    public string? UserNameCreated { get; set; }
-    public List<Question> Questions { get; set; } = new List<Question>();
 }

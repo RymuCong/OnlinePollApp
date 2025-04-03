@@ -46,16 +46,17 @@ public class PollController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [MapToApiVersion("1.0")]
-    public async Task<ActionResult<ResultModel<PollDto>>> Post([FromBody] PollDto dto)
+    public async Task<ActionResult<ResultModel<PollRequest>>> Post([FromBody] PollRequest request)
     {
         try
         {
-            await _dispatcher.DispatchAsync(new AddUpdatePollCommand { PollDto = dto });
-            return Created($"/api/v1/Poll/{dto.Id}", ResultModel<PollDto>.Create(dto));
+            await _dispatcher.DispatchAsync(new AddUpdatePollCommand { PollRequest = request });
+            // return Created($"/api/v1/Poll/{dto.Id}", ResultModel<PollDto>.Create(dto));
+            return Ok(request);
         }
         catch (Exception ex)
         {
-            return BadRequest(ResultModel<PollDto>.Create(dto, true, ex.Message, 400));
+            return BadRequest(ResultModel<PollRequest>.Create(request, true, ex.Message, 400));
         }
     }
 

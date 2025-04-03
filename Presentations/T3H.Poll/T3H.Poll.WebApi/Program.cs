@@ -1,3 +1,5 @@
+using AutoMapper;
+using FDS.CRM.CrossCuttingConcerns.ExtensionMethods;
 using T3H.Poll.Infrastructure.Web.ExceptionHandlers;
 using T3H.Poll.WebApi;
 using T3H.Poll.WebApi.ConfigurationOptions;
@@ -7,6 +9,7 @@ using T3H.Poll.Infrastructure.Interceptors;
 using T3H.Poll.Infrastructure.Logging;
 using T3H.Poll.Infrastructure.Identity;
 using Microsoft.AspNetCore.DataProtection;
+using T3H.Poll.Application.Common.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -47,10 +50,10 @@ services.AddSwagger(typeof(ApiAnchor));
 
 services.AddPersistence(appSettings.ConnectionStrings.CRMDatabase)
         .AddMessageHandlers()
-        //.AddApplicationServices((Type serviceType, Type implementationType, ServiceLifetime serviceLifetime) =>
-        //{
-        //    services.AddInterceptors(serviceType, implementationType, serviceLifetime, appSettings.Interceptors);
-        //})
+        .AddApplicationServices((Type serviceType, Type implementationType, ServiceLifetime serviceLifetime) =>
+        {
+            services.AddInterceptors(serviceType, implementationType, serviceLifetime, appSettings.Interceptors);
+        })
         .ConfigureInterceptors();
 
 services.AddDataProtection()
@@ -59,6 +62,14 @@ services.AddDataProtection()
 services.AddIdentityCore();
 
 services.AddDateTimeProvider();
+
+var mapperConfig = new MapperConfiguration(cfg =>
+{
+    cfg.AddProfile<MappingModel>();
+});
+services.AddSingleton(mapperConfig.CreateMapper().RegisterMap());
+services.AddSingleton(sp => sp.GetRequiredService<IMapper>().ConfigurationProvider);
+
 
 //services.AddEndpointsApiExplorer();
 //services.AddSwaggerGen(setupAction =>
