@@ -1,4 +1,6 @@
-﻿using T3H.Poll.Application.Polls.Commands;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Wordprocessing;
+using T3H.Poll.Application.Polls.Commands;
 using T3H.Poll.Application.Polls.DTOs;
 using T3H.Poll.Application.Polls.Queries;
 
@@ -20,15 +22,17 @@ public class PollController : ControllerBase
     }
 
     // [Authorize(AuthorizationPolicyNames.GetPollsPolicy)]
-    // [HttpGet]
-    // [MapToApiVersion("1.0")]
-    // public async Task<ActionResult<IEnumerable<PollDto>>> Get()
-    // {
-    //     var polls = await _dispatcher.DispatchAsync(new GetPollsQuery { AsNoTracking = true });
-    //     var model = polls.ToModels();
-    //     return Ok(model);
-    // }
-    //
+    [HttpGet("user/{creatorId}")]
+    [MapToApiVersion("1.0")]
+    public async Task<ActionResult<IEnumerable<Paged<PollResponse>>>> GetPollsByUserId(Guid creatorId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    {
+        ValidationException.Requires(creatorId != Guid.Empty, "Invalid Id");
+        
+        var polls = await _dispatcher.DispatchAsync(new GetPagedPollByUserIdQuery { CreatorId = creatorId, Page = page, PageSize = pageSize });
+        // var model = polls.ToModels();
+        return Ok(polls);
+    }
+    
     // [Authorize(AuthorizationPolicyNames.GetPollPolicy)]
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]

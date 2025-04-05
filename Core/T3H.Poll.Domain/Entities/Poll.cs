@@ -1,4 +1,6 @@
-﻿namespace T3H.Poll.Domain.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace T3H.Poll.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,6 +13,9 @@ public class Poll : Entity<Guid>, IAggregateRoot
     public string Title { get; set; }
 
     public string? Description { get; set; }
+    
+    [ForeignKey("User")]
+    public Guid CreatorId { get; set; }
 
     public DateTime StartTime { get; set; }
 
@@ -38,13 +43,14 @@ public class Poll : Entity<Guid>, IAggregateRoot
     public List<Question> Questions { get; set; } = new List<Question>();
     
     #region Business Logic
-    public static Poll Create(string title, string description, DateTime startTime, DateTime? endTime, bool isActive, bool isAnonymous, bool isMultipleVotesAllowed, bool isViewableByModerator, bool isPublic, string accessCode, string votingFrequencyControl, int votingCooldownMinutes)
+    public static Poll Create(string title, string description, Guid creatorId, DateTime startTime, DateTime? endTime, bool isActive, bool isAnonymous, bool isMultipleVotesAllowed, bool isViewableByModerator, bool isPublic, string accessCode, string votingFrequencyControl, int votingCooldownMinutes)
     {
         return new Poll
         {
             Id = Guid.NewGuid(),
             Title = title,
             Description = description,
+            CreatorId = creatorId,
             StartTime = startTime,
             EndTime = endTime,
             IsActive = isActive,

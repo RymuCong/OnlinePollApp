@@ -13,6 +13,7 @@ public class AddUpdatePollValidator
     {
         ValidationException.NotNullOrWhiteSpace(request.PollRequest.Title, "Tên cuộc khảo sát không được để trống.");
         ValidationException.NotNullOrWhiteSpace(request.PollRequest.Description, "Mô tả không được để trống.");
+        ValidationException.NotNullOrWhiteSpace(request.PollRequest.CreatorId.ToString(), "Người tạo không được để trống.");
         ValidationException.NotNullOrWhiteSpace(request.PollRequest.StartTime.ToString(), "Thời gian bắt đầu không được để trống.");
         ValidationException.NotNullOrWhiteSpace(request.PollRequest.EndTime.ToString(), "Thời gian kết thúc không được để trống.");
         ValidationException.NotPastDate(request.PollRequest.StartTime, "Thời gian bắt đầu không được là thời gian trong quá khứ.");
@@ -38,7 +39,7 @@ internal class AddUpdatePollCommandHandler : ICommandHandler<AddUpdatePollComman
 
         using (await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken))
         {
-            var poll = Domain.Entities.Poll.Create(command.PollRequest.Title, command.PollRequest.Description,
+            var poll = Domain.Entities.Poll.Create(command.PollRequest.Title, command.PollRequest.Description, command.PollRequest.CreatorId,
                 command.PollRequest.StartTime, command.PollRequest.EndTime, command.PollRequest.IsActive,
                 command.PollRequest.IsAnonymous, command.PollRequest.IsMultipleVotesAllowed,
                 command.PollRequest.IsViewableByModerator, command.PollRequest.IsPublic,
