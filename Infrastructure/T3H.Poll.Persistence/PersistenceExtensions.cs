@@ -24,11 +24,13 @@ public static class PersistenceExtensions
     {
         // Todo: chưa đăng ký repository
         services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>))
-                .AddScoped(typeof(ICommonSettingRepository), typeof(CommonSettingRepository))
-        //.AddScoped(typeof(ICategoryRepository), typeof(CategoryRepository))
-        //.AddScoped(typeof(ISupplierRepository), typeof(SupplierRepository));
-        .AddScoped(typeof(IUserRepository), typeof(UserRepository))
-        .AddScoped(typeof(IRoleRepository), typeof(RoleRepository));
+            .AddScoped(typeof(ICommonSettingRepository), typeof(CommonSettingRepository))
+            //.AddScoped(typeof(ICategoryRepository), typeof(CategoryRepository))
+            //.AddScoped(typeof(ISupplierRepository), typeof(SupplierRepository));
+            .AddScoped(typeof(IUserRepository), typeof(UserRepository))
+            .AddScoped(typeof(IRoleRepository), typeof(RoleRepository))
+            .AddScoped(typeof(IPollRepository), typeof(PollRepository))
+            ;
 
         services.AddScoped(typeof(IUnitOfWork), services =>
         {

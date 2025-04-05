@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using T3H.Poll.Application.Polls.DTOs;
+﻿using T3H.Poll.Application.Polls.DTOs;
 
 namespace T3H.Poll.Application.Common.Mapping
 {

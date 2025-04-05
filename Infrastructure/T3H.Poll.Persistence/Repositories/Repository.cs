@@ -110,4 +110,10 @@ where T : Entity<TKey>, IAggregateRoot
     {
         return ex is DbUpdateConcurrencyException;
     }
+    
+    public virtual async Task<bool> ExistAsync(Expression<Func<T, bool>>? spec = null)
+        => await (spec == null ? _dbContext.Set<T>().AnyAsync() : _dbContext.Set<T>().AnyAsync(spec));
+
+    public virtual async Task<int> CountAsync(Expression<Func<T, bool>>? spec = null)
+        => await (spec == null ? _dbContext.Set<T>().CountAsync() : _dbContext.Set<T>().CountAsync(spec));
 }

@@ -1,5 +1,6 @@
 ﻿using T3H.Poll.Application.Polls.Commands;
 using T3H.Poll.Application.Polls.DTOs;
+using T3H.Poll.Application.Polls.Queries;
 
 namespace T3H.Poll.WebApi.Controllers.V1;
 
@@ -28,17 +29,19 @@ public class PollController : ControllerBase
     //     return Ok(model);
     // }
     //
-    // // [Authorize(AuthorizationPolicyNames.GetPollPolicy)]
-    // [HttpGet("{id}")]
-    // [ProducesResponseType(StatusCodes.Status200OK)]
-    // [ProducesResponseType(StatusCodes.Status404NotFound)]
-    // [MapToApiVersion("1.0")]
-    // public async Task<ActionResult<PollDto>> Get(Guid id)
-    // {
-    //     var poll = await _dispatcher.DispatchAsync(new GetPollQuery { Id = id, AsNoTracking = true });
-    //     var model = poll.ToModel();
-    //     return Ok(model);
-    // }
+    // [Authorize(AuthorizationPolicyNames.GetPollPolicy)]
+    [HttpGet("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [MapToApiVersion("1.0")]
+    public async Task<ActionResult<PollResponse>> Get(Guid id)
+    {
+        ValidationException.Requires(id != Guid.Empty, "Invalid Id");
+        
+        var poll = await _dispatcher.DispatchAsync(new GetPollQuery { Id = id});
+        // var model = poll.ToModel();
+        return Ok(poll);
+    }
 
     // [Authorize(AuthorizationPolicyNames.AddPollPolicy)]
     [HttpPost]

@@ -24,6 +24,7 @@ public static class ApplicationServicesExtensions
 
             // configureInterceptor(typeof(IUserService), typeof(UserService), ServiceLifetime.Scoped);
             // configureInterceptor(typeof(IProductService), typeof(ProductService), ServiceLifetime.Scoped);
+            configureInterceptor(typeof(IPollService), typeof(PollService), ServiceLifetime.Scoped);
         }
 
         return services;

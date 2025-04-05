@@ -27,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Core\T3H.Poll.Application\T3H.Poll.Application.csproj" />
     <ProjectReference Include="..\..\..\Infrastructure\T3H.Poll.Infrastructure\T3H.Poll.Infrastructure.csproj" />
+	<ProjectReference Include="..\..\..\CrossCuttingConcerns\T3H.Poll.CrossCuttingConcerns\T3H.Poll.CrossCuttingConcerns.csproj" />
     <ProjectReference Include="..\..\..\Infrastructure\T3H.Poll.Persistence\T3H.Poll.Persistence.csproj" />
   </ItemGroup>
 

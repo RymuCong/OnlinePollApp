@@ -18,7 +18,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Polls\Queries\" />
 	  <Folder Include="Supplier\Commands\" />
 	  <Folder Include="Supplier\DTOs\" />
 	  <Folder Include="Supplier\EventHandlers\" />

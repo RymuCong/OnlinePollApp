@@ -13,4 +13,5 @@ global using T3H.Poll.Domain.Enums;
 global using T3H.Poll.Application.CommonSetting.DTOs;
 global using  T3H.Poll.Application.Users.DTOs;
 global using T3H.Poll.Application.Common.DTOs;
+global using AutoMapper;
 
