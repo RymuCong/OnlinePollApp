@@ -8,10 +8,30 @@ public record ResultModel<T>(T Data, bool IsError = false, string ErrorMessage =
     }
 }
 
-public record ListResultModel<T>(List<T> Items, long TotalItems, int Page, int PageSize) where T : notnull
+public record ListResultModel<T>(List<T> Items, long TotalItems, int CurrentPage, int PageSize, int TotalPages) where T : notnull
 {
-    public static ListResultModel<T> Create(List<T> items, long totalItems = 0, int page = 1, int pageSize = 20)
+    public bool HasPrevious => CurrentPage > 1;
+    
+    public bool HasNext => CurrentPage < TotalPages;
+    
+    public static ListResultModel<T> Create(List<T> items, long totalItems = 0, int currentPage = 1, int pageSize = 20, int? totalPages = null)
     {
-        return new(items, totalItems, page, pageSize);
+        // Validate inputs
+        if (currentPage < 1)
+            currentPage = 1;
+            
+        if (pageSize < 1)
+            pageSize = 20;
+            
+        // Calculate total pages if not provided
+        var calculatedTotalPages = totalPages ?? 
+                                   (pageSize > 0 ? (int)Math.Ceiling(totalItems / (double)pageSize) : 1);
+            
+        return new(
+            items ?? new List<T>(), 
+            totalItems, 
+            currentPage, 
+            pageSize, 
+            calculatedTotalPages);
     }
 }

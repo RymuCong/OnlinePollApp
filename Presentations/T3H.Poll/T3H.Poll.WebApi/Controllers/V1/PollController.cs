@@ -66,7 +66,36 @@ public class PollController : ControllerBase
             return BadRequest(ResultModel<PollRequest>.Create(request, true, ex.Message, 400));
         }
     }
-
+    
+    // Search by poll title, description, or creator
+    [HttpGet("search")]    
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [MapToApiVersion("1.0")]
+    public async Task<ActionResult<ListResultModel<PollResponse>>> SearchPolls(
+        [FromQuery] string title = null,
+        [FromQuery] string description = null,
+        [FromQuery] Guid? creatorId = null,
+        [FromQuery] int page = 1, 
+        [FromQuery] int pageSize = 20)
+    {
+        // Ensure at least one search parameter is provided
+        ValidationException.Requires(
+            !string.IsNullOrWhiteSpace(title) || 
+            !string.IsNullOrWhiteSpace(description) || 
+            (creatorId.HasValue && creatorId != Guid.Empty), 
+            "At least one search parameter must be provided");
+    
+        var polls = await _dispatcher.DispatchAsync(new SearchPollsQuery { 
+            Title = title, 
+            Description = description,
+            CreatorId = creatorId,
+            Page = page, 
+            PageSize = pageSize 
+        });
+    
+        return Ok(polls);
+    }
     // [Authorize(AuthorizationPolicyNames.UpdatePollPolicy)]
     // [HttpPut("{id}")]
     // [Consumes("application/json")]
