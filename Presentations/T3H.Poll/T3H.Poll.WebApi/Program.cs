@@ -1,5 +1,5 @@
 using AutoMapper;
-using FDS.CRM.CrossCuttingConcerns.ExtensionMethods;
+using T3H.Poll.CrossCuttingConcerns.ExtensionMethods;
 using T3H.Poll.Infrastructure.Web.ExceptionHandlers;
 using T3H.Poll.WebApi;
 using T3H.Poll.WebApi.ConfigurationOptions;
@@ -57,7 +57,7 @@ services.AddPersistence(appSettings.ConnectionStrings.CRMDatabase)
         .ConfigureInterceptors();
 
 services.AddDataProtection()
-    .SetApplicationName("FDS.CRM");
+    .SetApplicationName("T3H.Poll");
 
 services.AddIdentityCore();
 

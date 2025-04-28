@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using T3H.Poll.Application.Common.Queries;
 using T3H.Poll.Application.Polls.DTOs;
@@ -38,16 +39,17 @@ public class SearchPollsQuery : BaseSearchQuery<Domain.Entities.Poll, PollRespon
 
     public override Expression<Func<Domain.Entities.Poll, PollResponse>> GetSelectExpression()
     {
-        return p => new PollResponse
-        {
-            Id = p.Id,
-            Title = p.Title,
-            Description = p.Description,
-            CreatedDateTime = p.CreatedDateTime,
-            UserNameCreated = p.UserNameCreated,
-            IsActive = p.IsActive,
-            IsPublic = p.IsPublic
-        };
+        // return p => new PollResponse
+        // {
+        //     Id = p.Id,
+        //     Title = p.Title,
+        //     Description = p.Description,
+        //     CreatedDateTime = p.CreatedDateTime,
+        //     UserNameCreated = p.UserNameCreated,
+        //     IsActive = p.IsActive,
+        //     IsPublic = p.IsPublic,
+        // };
+        return null;
     }
 
     public override IQueryable<Domain.Entities.Poll> AddIncludes(IQueryable<Domain.Entities.Poll> query)
@@ -119,7 +121,7 @@ public class SearchPollsQueryHandler : BaseSearchQueryHandler<Domain.Entities.Po
         var items = await sortedQuery
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
-            .Select(query.GetSelectExpression())
+            .ProjectTo<PollResponse>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
         return ListResultModel<PollResponse>.Create(

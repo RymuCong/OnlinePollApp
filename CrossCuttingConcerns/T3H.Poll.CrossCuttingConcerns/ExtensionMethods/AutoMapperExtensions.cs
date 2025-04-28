@@ -3,7 +3,7 @@ using System.Reflection;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 
-namespace FDS.CRM.CrossCuttingConcerns.ExtensionMethods;
+namespace T3H.Poll.CrossCuttingConcerns.ExtensionMethods;
 
 public static class AutoMapperExtensions
 {

@@ -25,7 +25,7 @@ namespace T3H.Poll.Migration.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.Choice", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.Choice", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -97,7 +97,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("Choices");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.CommonSetting", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.CommonSetting", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -168,7 +168,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("CommonSettings");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.PasswordHistory", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.PasswordHistory", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -227,7 +227,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("PasswordHistory");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.PaymentMethod", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.PaymentMethod", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -287,7 +287,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("PaymentMethods");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.PaymentTerm", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.PaymentTerm", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -345,7 +345,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("PaymentTerms");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.Poll", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.Poll", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -445,7 +445,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("Polls");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.PollAnalytics", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.PollAnalytics", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -519,7 +519,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("PollAnalytics");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.PollInvitation", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.PollInvitation", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -598,7 +598,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("PollInvitations");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.PurchaseTransaction", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.PurchaseTransaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -666,7 +666,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("PurchaseTransactions");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.Question", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.Question", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -748,7 +748,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("Questions");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.Role", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.Role", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -811,7 +811,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("Roles", (string)null);
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.RoleClaim", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.RoleClaim", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -875,7 +875,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("RoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.User", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -999,7 +999,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.UserClaim", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.UserClaim", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1063,7 +1063,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("UserClaims", (string)null);
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.UserRole", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.UserRole", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1124,7 +1124,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("UserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.UserToken", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.UserToken", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1192,7 +1192,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.VoteDetail", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.VoteDetail", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1282,7 +1282,7 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("VoteDetails");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.VotingHistory", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.VotingHistory", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1374,18 +1374,18 @@ namespace T3H.Poll.Migration.Migrations
                     b.ToTable("DataProtectionKeys");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.Choice", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.Choice", b =>
                 {
-                    b.HasOne("FDS.CRM.Domain.Entities.Question", null)
+                    b.HasOne("T3H.Poll.Domain.Entities.Question", null)
                         .WithMany("Choices")
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.PasswordHistory", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.PasswordHistory", b =>
                 {
-                    b.HasOne("FDS.CRM.Domain.Entities.User", "User")
+                    b.HasOne("T3H.Poll.Domain.Entities.User", "User")
                         .WithMany("PasswordHistories")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1394,9 +1394,9 @@ namespace T3H.Poll.Migration.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.PollAnalytics", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.PollAnalytics", b =>
                 {
-                    b.HasOne("FDS.CRM.Domain.Entities.Poll", "Poll")
+                    b.HasOne("T3H.Poll.Domain.Entities.Poll", "Poll")
                         .WithMany()
                         .HasForeignKey("PollId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1405,15 +1405,15 @@ namespace T3H.Poll.Migration.Migrations
                     b.Navigation("Poll");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.PollInvitation", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.PollInvitation", b =>
                 {
-                    b.HasOne("FDS.CRM.Domain.Entities.User", "User")
+                    b.HasOne("T3H.Poll.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FDS.CRM.Domain.Entities.Poll", "Poll")
+                    b.HasOne("T3H.Poll.Domain.Entities.Poll", "Poll")
                         .WithMany()
                         .HasForeignKey("PollId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1424,21 +1424,21 @@ namespace T3H.Poll.Migration.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.PurchaseTransaction", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.PurchaseTransaction", b =>
                 {
-                    b.HasOne("FDS.CRM.Domain.Entities.PaymentMethod", "PaymentMethod")
+                    b.HasOne("T3H.Poll.Domain.Entities.PaymentMethod", "PaymentMethod")
                         .WithMany()
                         .HasForeignKey("BuyPaymentMethodId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FDS.CRM.Domain.Entities.PaymentTerm", "PaymentTerm")
+                    b.HasOne("T3H.Poll.Domain.Entities.PaymentTerm", "PaymentTerm")
                         .WithMany()
                         .HasForeignKey("BuyPaymentTermId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FDS.CRM.Domain.Entities.User", "User")
+                    b.HasOne("T3H.Poll.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("SaleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1451,16 +1451,16 @@ namespace T3H.Poll.Migration.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.Question", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.Question", b =>
                 {
-                    b.HasOne("FDS.CRM.Domain.Entities.Poll", null)
+                    b.HasOne("T3H.Poll.Domain.Entities.Poll", null)
                         .WithMany("Questions")
                         .HasForeignKey("PollId");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.RoleClaim", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.RoleClaim", b =>
                 {
-                    b.HasOne("FDS.CRM.Domain.Entities.Role", "Role")
+                    b.HasOne("T3H.Poll.Domain.Entities.Role", "Role")
                         .WithMany("Claims")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1469,9 +1469,9 @@ namespace T3H.Poll.Migration.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.UserClaim", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.UserClaim", b =>
                 {
-                    b.HasOne("FDS.CRM.Domain.Entities.User", "User")
+                    b.HasOne("T3H.Poll.Domain.Entities.User", "User")
                         .WithMany("Claims")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1480,15 +1480,15 @@ namespace T3H.Poll.Migration.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.UserRole", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.UserRole", b =>
                 {
-                    b.HasOne("FDS.CRM.Domain.Entities.Role", "Role")
+                    b.HasOne("T3H.Poll.Domain.Entities.Role", "Role")
                         .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FDS.CRM.Domain.Entities.User", "User")
+                    b.HasOne("T3H.Poll.Domain.Entities.User", "User")
                         .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1499,30 +1499,30 @@ namespace T3H.Poll.Migration.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.UserToken", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.UserToken", b =>
                 {
-                    b.HasOne("FDS.CRM.Domain.Entities.User", null)
+                    b.HasOne("T3H.Poll.Domain.Entities.User", null)
                         .WithMany("Tokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.VoteDetail", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.VoteDetail", b =>
                 {
-                    b.HasOne("FDS.CRM.Domain.Entities.Choice", "Choice")
+                    b.HasOne("T3H.Poll.Domain.Entities.Choice", "Choice")
                         .WithMany()
                         .HasForeignKey("ChoiceId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("FDS.CRM.Domain.Entities.Question", "Question")
+                    b.HasOne("T3H.Poll.Domain.Entities.Question", "Question")
                         .WithMany()
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("FDS.CRM.Domain.Entities.User", "User")
+                    b.HasOne("T3H.Poll.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1535,15 +1535,15 @@ namespace T3H.Poll.Migration.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.VotingHistory", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.VotingHistory", b =>
                 {
-                    b.HasOne("FDS.CRM.Domain.Entities.Poll", "Poll")
+                    b.HasOne("T3H.Poll.Domain.Entities.Poll", "Poll")
                         .WithMany()
                         .HasForeignKey("PollId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FDS.CRM.Domain.Entities.User", "User")
+                    b.HasOne("T3H.Poll.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1554,24 +1554,24 @@ namespace T3H.Poll.Migration.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.Poll", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.Poll", b =>
                 {
                     b.Navigation("Questions");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.Question", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.Question", b =>
                 {
                     b.Navigation("Choices");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.Role", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.Role", b =>
                 {
                     b.Navigation("Claims");
 
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("FDS.CRM.Domain.Entities.User", b =>
+            modelBuilder.Entity("T3H.Poll.Domain.Entities.User", b =>
                 {
                     b.Navigation("Claims");
 
