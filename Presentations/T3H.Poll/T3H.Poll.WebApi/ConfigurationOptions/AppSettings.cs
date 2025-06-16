@@ -1,4 +1,5 @@
 ﻿using CryptographyHelper.Certificates;
+using Microsoft.AspNetCore.Authentication;
 using T3H.Poll.Infrastructure.Interceptors;
 using T3H.Poll.Infrastructure.Logging;
 
@@ -15,7 +16,8 @@ namespace T3H.Poll.WebApi.ConfigurationOptions
         //public MonitoringOptions Monitoring { get; set; }
 
         public IdentityServerAuthentication IdentityServerAuthentication { get; set; }
-
+        public AuthenticationOptions Authentication { get; set; }
+        
         public string AllowedHosts { get; set; }
 
         public CORS CORS { get; set; }

@@ -7,13 +7,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Folder Include="Caching\" />
 		<Folder Include="Configuration\" />
 		<Folder Include="Csv\" />
 		<Folder Include="DateTimes\" />
 		<Folder Include="Excel\" />
-		<Folder Include="Web\Authentication\" />
-		<Folder Include="Web\Authorization\" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -40,7 +37,9 @@
 		<PackageReference Include="ExcelDataReader" Version="3.6.0" />
 		<PackageReference Include="FluentValidation" Version="11.0.2" />
 		<PackageReference Include="IdentityModel" Version="6.2.0" />
+		<PackageReference Include="JWT" Version="10.1.1" />
 		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />

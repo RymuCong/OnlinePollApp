@@ -1,9 +1,15 @@
-﻿
-using T3H.Poll.Application.Common.Commands;
+﻿using T3H.Poll.Application.Common.Commands;
 using T3H.Poll.Application.Users.Commands;
 using T3H.Poll.Application.Users.Queries;
 using T3H.Poll.CrossCuttingConcerns.ExtensionMethods;
 using T3H.Poll.WebApi.Models.Users;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using T3H.Poll.Application.Common.Token;
+using T3H.Poll.Application.Users.Services;
+using T3H.Poll.Domain.Identity;
+using Wangkanai.Detection.Services;
 
 namespace T3H.Poll.WebApi.Controllers.V1;
 
@@ -16,22 +22,44 @@ namespace T3H.Poll.WebApi.Controllers.V1;
 public class UsersController : ControllerBase
 {
     private readonly Dispatcher _dispatcher;
+    
+    // Cung cấp các hàm để quản lý người dùng Tạo, xoá, cập nhật, tìm kiếm, đổi mật khẩu, Khoá tài khoản, xác minh email
     private readonly UserManager<User> _userManager;
+    // Cung cấp chức năng về xử lý đăng nhập, đăng xuất người dùng
+    private readonly SignInManager<User> _signInManager;
+    // Quản lý role (tạo, sửa, xoá, gán quyền cho role)
+    //private readonly RoleManager<Role> _roleManager;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ITokenFactory _tokenFactory;
     private readonly AppSettings _appSettings;
+    private readonly IDetectionService _detectionService;
+    private readonly ICurrentUser currentUser;
+    private readonly IUserService _userService;
+    private readonly RedisCacheService _cache;
 
     public UsersController(Dispatcher dispatcher,
         UserManager<User> userManager,
         ILogger<UsersController> logger,
         IDateTimeProvider dateTimeProvider,
-        IOptionsSnapshot<AppSettings> appSettings)
+        IOptionsSnapshot<AppSettings> appSettings,
+        SignInManager<User> signInManager,
+        ITokenFactory tokenFactory,
+        IDetectionService detectionService,
+        ICurrentUser currentUser,
+        IUserService userService,
+        RedisCacheService cache)
     {
         _dispatcher = dispatcher;
         _userManager = userManager;
         _dateTimeProvider = dateTimeProvider;
         _appSettings = appSettings.Value;
+        _signInManager = signInManager;
+        _tokenFactory = tokenFactory;
+        _detectionService = detectionService;
+        this.currentUser = currentUser;
+        _userService = userService;
+        _cache = cache;
     }
-
    // [Authorize(AuthorizationPolicyNames.GetUsersPolicy)]
     [HttpGet]
     [MapToApiVersion("1.0")]
@@ -211,5 +239,129 @@ public class UsersController : ControllerBase
         }
 
         return Ok();
+    }
+    
+    [HttpPost("login")]
+    [MapToApiVersion("1.0")]
+    public async Task<ActionResult> Login([FromBody] LoginModel model, CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Kiểm tra user tồn tại
+            var user = await _userManager.FindByNameAsync(model.userName);
+            if (user == null)
+                return BadRequest(new { Message = "Tài khoản không tồn tại" });
+
+            // Kiểm tra password
+            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
+            if (!result.Succeeded)
+                return BadRequest(new { Message = "Sai mật khẩu" });
+
+            // Lấy roles của user
+            var roles = await _userManager.GetRolesAsync(user);
+           
+
+            // Lấy thời gian hiện tại theo UTC
+            var issuedAtUtc = DateTimeOffset.UtcNow;
+            // Chuyển sang Unix timestamp (giây)
+            var iatUnixTimestamp = issuedAtUtc.ToUnixTimeSeconds();
+            // lay permission
+            var per = await _userService.GetPermissionsAsync(user.Id, "Permission");
+
+            var cacheKey = $"permissions/{user.Id}/{iatUnixTimestamp}";
+
+            // Lưu vào cache
+            await _cache.SetAsync(
+                 key: cacheKey,
+                 value: per,
+                 TimeSpan.FromMinutes(30));
+
+            // Tạo token
+            DateTime refreshExpireTime;
+            DateTime accessTokenExpiredTime;
+            string familyId = StringHelpers.GetRandomString(32);
+            // Lấy thông tin của trình duyệt (cái nơi call api)
+            var userAgent = _detectionService.UserAgent.ToString();
+
+            if (model.RememberMe)
+            {
+                accessTokenExpiredTime = DateTime.UtcNow.AddDays(7);
+                refreshExpireTime = DateTime.UtcNow.AddDays(30);
+            }
+            else
+            {
+                accessTokenExpiredTime = _tokenFactory.AccesstokenExpiredTime;
+                refreshExpireTime = _tokenFactory.RefreshtokenExpiredTime;
+            }
+
+            var userToken = new UserAccessToken()
+            {
+                ExpiredTime = refreshExpireTime,
+                UserId = user.Id,
+                FamilyId = familyId,
+                UserAgent = userAgent,
+                // ClientIp = currentUser.GetClientIp(),
+            };
+
+            string accessToken = _tokenFactory.CreateToken(
+                [
+                    new(JwtRegisteredClaimNames.Sub.ToString(), user.Id.ToString()),
+                    new Claim(System.Security.Claims.ClaimTypes.Role, roles.FirstOrDefault()),
+                    new Claim(System.Security.Claims.ClaimTypes.Email, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Iat, iatUnixTimestamp.ToString(), ClaimValueTypes.Integer64),
+                 ], accessTokenExpiredTime);
+
+            string refreshToken = _tokenFactory.CreateToken(
+                [
+                    new(Infrastructure.Token.ClaimTypes.TokenFamilyId, familyId),
+                    new(JwtRegisteredClaimNames.Sub, user.Id.ToString())
+
+                ], refreshExpireTime);
+
+            userToken.RefreshToken = refreshToken;
+
+            Response.Cookies.Append("access_token", accessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true, // Bắt buộc dùng HTTPS
+                SameSite = SameSiteMode.Strict,
+                Expires = accessTokenExpiredTime
+            });
+
+            Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true, // Bắt buộc dùng HTTPS
+                SameSite = SameSiteMode.Strict,
+                Expires = refreshExpireTime
+            });
+
+            //await unitOfWork.Repository<UserAccessToken>().AddAsync(userToken, cancellationToken);
+            //await unitOfWork.SaveAsync(cancellationToken);
+            //return Ok();
+            var data = new
+            {
+                Token = accessToken,
+                Refresh = refreshToken,
+                AccessTokenExpiredIn = (long)
+                    Math.Ceiling((accessTokenExpiredTime - DateTime.UtcNow).TotalSeconds),
+                TokenType = JwtBearerDefaults.AuthenticationScheme,
+                User = new
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    Roles = roles,
+                }
+            };
+            var result1 = new ResultModel<object>(data);
+            return Ok(result1);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = "Lỗi server", Error = ex.Message });
+        }
+
     }
 }

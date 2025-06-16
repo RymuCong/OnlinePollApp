@@ -1,15 +1,18 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using T3H.Poll.CrossCuttingConcerns.ExtensionMethods;
 using T3H.Poll.Infrastructure.Web.ExceptionHandlers;
 using T3H.Poll.WebApi;
-using T3H.Poll.WebApi.ConfigurationOptions;
+using StackExchange.Redis;
 using T3H.Poll.Persistence;
 using T3H.Poll.Infrastructure.DateTimes;
 using T3H.Poll.Infrastructure.Interceptors;
 using T3H.Poll.Infrastructure.Logging;
 using T3H.Poll.Infrastructure.Identity;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.IdentityModel.Tokens;
 using T3H.Poll.Application.Common.Mapping;
+using T3H.Poll.Infrastructure.Caching;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -70,90 +73,26 @@ var mapperConfig = new MapperConfiguration(cfg =>
 services.AddSingleton(mapperConfig.CreateMapper().RegisterMap());
 services.AddSingleton(sp => sp.GetRequiredService<IMapper>().ConfigurationProvider);
 
+services.AddAuthentication(options =>
+{
+    options.DefaultScheme = appSettings.Authentication.Provider switch
+    {
+        "Jwt" => "Jwt",
+        _ => JwtBearerDefaults.AuthenticationScheme
+    };
+})
+.AddJwtBearer("Jwt", options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidIssuer = appSettings.Authentication.Jwt.IssuerUri,
+        ValidAudience = appSettings.Authentication.Jwt.Audience,
+        TokenDecryptionKey = new X509SecurityKey(appSettings.Authentication.Jwt.TokenDecryptionCertificate.FindCertificate()),
+        IssuerSigningKey = new X509SecurityKey(appSettings.Authentication.Jwt.IssuerSigningCertificate.FindCertificate()),
+    };
+});
 
-//services.AddEndpointsApiExplorer();
-//services.AddSwaggerGen(setupAction =>
-//{
-//    setupAction.SwaggerDoc(
-//        $"v1.0",
-//        new OpenApiInfo()
-//        {
-//            Title = " API",
-//            Version = "1",
-//            Description = "ClassifiedAds API Specification.",
-//            Contact = new OpenApiContact
-//            {
-//                Email = "abc.xyz@gmail.com",
-//                Name = "Phong Nguyen",
-//                Url = new Uri("https://github.com/phongnguyend"),
-//            },
-//            License = new OpenApiLicense
-//            {
-//                Name = "MIT License",
-//                Url = new Uri("https://opensource.org/licenses/MIT"),
-//            },
-//        });
-
-//    setupAction.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-//    {
-//        Type = SecuritySchemeType.Http,
-//        Scheme = "Bearer",
-//        BearerFormat = "JWT",
-//        Description = "Input your Bearer token to access this API",
-//    });
-
-
-//    setupAction.AddSecurityDefinition("Oidc", new OpenApiSecurityScheme
-//    {
-//        Type = SecuritySchemeType.OAuth2,
-//        Flows = new OpenApiOAuthFlows
-//        {
-//            AuthorizationCode = new OpenApiOAuthFlow
-//            {
-//                //TokenUrl = new Uri(appSettings.IdentityServerAuthentication.Authority + "/connect/token", UriKind.Absolute),
-//                //AuthorizationUrl = new Uri(appSettings.IdentityServerAuthentication.Authority + "/connect/authorize", UriKind.Absolute),
-//                //Scopes = new Dictionary<string, string>
-//                //{
-//                //            { "openid", "OpenId" },
-//                //            { "profile", "Profile" },
-//                //            { "ClassifiedAds.WebAPI", "ClassifiedAds WebAPI" },
-//                //},
-//            },
-//            ClientCredentials = new OpenApiOAuthFlow
-//            {
-//                //TokenUrl = new Uri(appSettings.IdentityServerAuthentication.Authority + "/connect/token", UriKind.Absolute),
-//                //Scopes = new Dictionary<string, string>
-//                //{
-//                //            { "ClassifiedAds.WebAPI", "ClassifiedAds WebAPI" },
-//                //},
-//            },
-//        },
-//    });
-
-//    setupAction.AddSecurityRequirement(new OpenApiSecurityRequirement
-//    {
-//        {
-//            new OpenApiSecurityScheme
-//            {
-//                Reference = new OpenApiReference
-//                {
-//                    Type = ReferenceType.SecurityScheme,
-//                    Id = "Oidc",
-//                },
-//            }, new List<string>()
-//        },
-//        {
-//            new OpenApiSecurityScheme
-//            {
-//                Reference = new OpenApiReference
-//                {
-//                    Type = ReferenceType.SecurityScheme,
-//                    Id = "Bearer",
-//                },
-//            }, new List<string>()
-//        },
-//    });
-//});
+builder.Services.AddSingleton<RedisCacheService>();
 
 var app = builder.Build();
 
