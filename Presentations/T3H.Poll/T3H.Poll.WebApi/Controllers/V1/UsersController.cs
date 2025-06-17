@@ -9,6 +9,7 @@ using System.Security.Claims;
 using T3H.Poll.Application.Common.Token;
 using T3H.Poll.Application.Users.Services;
 using T3H.Poll.Domain.Identity;
+using T3H.Poll.Infrastructure.Caching;
 using Wangkanai.Detection.Services;
 
 namespace T3H.Poll.WebApi.Controllers.V1;

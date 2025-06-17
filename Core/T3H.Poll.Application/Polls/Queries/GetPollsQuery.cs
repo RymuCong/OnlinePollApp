@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using T3H.Poll.Application.Polls.DTOs;
-using T3H.Poll.CrossCuttingConcerns.Cache.Constants;
-using T3H.Poll.CrossCuttingConcerns.Cache.RedisCache;
 
 namespace T3H.Poll.Application.Polls.Queries;
 

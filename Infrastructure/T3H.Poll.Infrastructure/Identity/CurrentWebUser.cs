@@ -1,13 +1,9 @@
-﻿using T3H.Poll.Domain.Identity;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Security.Claims;
-
-namespace T3H.Poll.Infrastructure.Identity;
+﻿namespace T3H.Poll.Infrastructure.Identity;
 
 public class CurrentWebUser : ICurrentUser
 {
     private readonly IHttpContextAccessor _context;
+    private ClaimsPrincipal user = null!;
 
     public CurrentWebUser(IHttpContextAccessor context)
     {
@@ -26,10 +22,15 @@ public class CurrentWebUser : ICurrentUser
     {
         get
         {
-            var userId = _context.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                ?? _context.HttpContext.User.FindFirst("sub")?.Value;
+            var userId = _context.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                         ?? _context.HttpContext.User.FindFirst("sub")?.Value;
 
             return Guid.Parse(userId);
         }
+    }
+
+    public string GetClientIp(HttpContext httpContext)
+    {
+        return httpContext.Connection.RemoteIpAddress?.ToString();
     }
 }
