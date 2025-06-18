@@ -32,5 +32,7 @@ namespace T3H.Poll.Domain.Repositories
         void BulkMerge(IEnumerable<TEntity> entities, Expression<Func<TEntity, object>> idSelector, Expression<Func<TEntity, object>> updateColumnNamesSelector, Expression<Func<TEntity, object>> insertColumnNamesSelector);
 
         void BulkDelete(IEnumerable<TEntity> entities);
+        
+        void RemoveRange(IEnumerable<TEntity> entities);
     }
 }

@@ -92,6 +92,12 @@ services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp => 
+{
+    var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? "localhost";
+    return ConnectionMultiplexer.Connect(redisConnectionString);
+});
+
 builder.Services.AddSingleton<RedisCacheService>();
 
 var app = builder.Build();
@@ -102,24 +108,6 @@ app.UseExceptionHandler(options => { });
 app.UseSwagger();
 app.UseRouting();
 app.MapGet("/", () => Results.LocalRedirect("~/swagger"));
-//app.UseSwaggerUI(setupAction =>
-//{
-//    setupAction.OAuthClientId("Swagger");
-//    setupAction.OAuthClientSecret("secret");
-//    setupAction.OAuthUsePkce();
-
-//    setupAction.SwaggerEndpoint(
-//        "/swagger/ClassifiedAds/swagger.json",
-//        "ClassifiedAds API");
-
-//    setupAction.RoutePrefix = string.Empty;
-
-//    setupAction.DefaultModelExpandDepth(2);
-//    setupAction.DefaultModelRendering(ModelRendering.Model);
-//    setupAction.DocExpansion(DocExpansion.None);
-//    setupAction.EnableDeepLinking();
-//    setupAction.DisplayOperationId();
-//});
 
 app.UseAuthentication();
 app.UseAuthorization();

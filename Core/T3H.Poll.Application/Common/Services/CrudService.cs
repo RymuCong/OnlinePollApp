@@ -1,4 +1,9 @@
-﻿using System.Linq.Expressions;
+﻿using T3H.Poll.Domain.Entities;
+using T3H.Poll.Infrastructure.Web.Authentication;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using System.Linq.Expressions;
+using System.Security.Claims;
 
 namespace T3H.Poll.Application.Common.Services;
 
@@ -46,7 +51,7 @@ public class CrudService<T> : ICrudService<T> where T : Entity<Guid>, IAggregate
 
     public async Task AddOrUpdateAsync(T entity, CancellationToken cancellationToken = default)
     {
-        if (entity.Id.Equals(default))
+        if (entity.Id.Equals(default) || await _repository.GetQueryableSet().FirstOrDefaultAsync(p => p.Id == entity.Id) is null)
         {
             await AddAsync(entity, cancellationToken);
         }
@@ -58,6 +63,7 @@ public class CrudService<T> : ICrudService<T> where T : Entity<Guid>, IAggregate
 
     public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
     {
+        entity.UserNameCreated = HttpContextCustom.Current?.User?.Claims.Where(c => c.Type == ClaimTypes.Email).FirstOrDefault()?.Value;
         await _repository.AddAsync(entity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         await _dispatcher.DispatchAsync(new EntityCreatedEvent<T>(entity, DateTime.UtcNow), cancellationToken);
@@ -65,9 +71,18 @@ public class CrudService<T> : ICrudService<T> where T : Entity<Guid>, IAggregate
 
     public async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
     {
-        await _repository.UpdateAsync(entity, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-        await _dispatcher.DispatchAsync(new EntityUpdatedEvent<T>(entity, DateTime.UtcNow), cancellationToken);
+        try
+        {
+            await _repository.UpdateAsync(entity, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _dispatcher.DispatchAsync(new EntityUpdatedEvent<T>(entity, DateTime.UtcNow), cancellationToken);
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+        
     }
 
     public async Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
@@ -75,5 +90,21 @@ public class CrudService<T> : ICrudService<T> where T : Entity<Guid>, IAggregate
         _repository.Delete(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         await _dispatcher.DispatchAsync(new EntityDeletedEvent<T>(entity, DateTime.UtcNow), cancellationToken);
+    }
+
+    public async Task RemoveRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default)
+    {
+        if (entities == null || !entities.Any())
+        {
+            return;
+        }
+
+        _repository.RemoveRange(entities);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        foreach (var entity in entities)
+        {
+            await _dispatcher.DispatchAsync(new EntityDeletedEvent<T>(entity, DateTime.UtcNow), cancellationToken);
+        }
     }
 }

@@ -2,6 +2,7 @@
 using T3H.Poll.Application.Users.Commands;
 using T3H.Poll.Application.Users.Queries;
 using T3H.Poll.CrossCuttingConcerns.ExtensionMethods;
+using T3H.Poll.CrossCuttingConcerns.Helper;
 using T3H.Poll.WebApi.Models.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.IdentityModel.Tokens.Jwt;

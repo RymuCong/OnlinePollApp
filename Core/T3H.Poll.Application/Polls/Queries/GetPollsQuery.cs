@@ -1,7 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using T3H.Poll.Application.Polls.DTOs;
+using T3H.Poll.Infrastructure.Caching;
 
 namespace T3H.Poll.Application.Polls.Queries;
+
+// Redis key constants class
+public static class RedisKeyConstants
+{
+    public const string GetPollsByUserId = "polls:by-user-id";
+}
 
 public class GetPagedPollByUserIdQuery : IQuery<Paged<PollResponse>>
 {
@@ -14,11 +21,13 @@ internal class GetPagedPollByUserIdQueryHandler : IQueryHandler<GetPagedPollByUs
 {
     private readonly IPollRepository _pollRepository;
     private readonly IMapper _mapper;
+    private readonly RedisCacheService _cacheService;
 
-    public GetPagedPollByUserIdQueryHandler(IPollRepository pollRepository, IMapper mapper)
+    public GetPagedPollByUserIdQueryHandler(IPollRepository pollRepository, IMapper mapper, RedisCacheService cacheService)
     {
         _pollRepository = pollRepository;
         _mapper = mapper;
+        _cacheService = cacheService;
     }
 
     public async Task<Paged<PollResponse>> HandleAsync(GetPagedPollByUserIdQuery request, CancellationToken cancellationToken)
@@ -27,9 +36,10 @@ internal class GetPagedPollByUserIdQueryHandler : IQueryHandler<GetPagedPollByUs
         var redisKey = $"{RedisKeyConstants.GetPollsByUserId}:{request.CreatorId}:{request.Page}:{request.PageSize}";
         
         // Try to get data from Redis first
-        if (await RedisConnection.Connection.ExistsAsync(redisKey))
+        var cachedResult = await _cacheService.GetAsync<Paged<PollResponse>>(redisKey);
+        if (cachedResult != null)
         {
-            return await RedisConnection.Connection.GetAsync<Paged<PollResponse>>(redisKey);
+            return cachedResult;
         }
         
         // If not in cache, query the database
@@ -51,7 +61,7 @@ internal class GetPagedPollByUserIdQueryHandler : IQueryHandler<GetPagedPollByUs
         };
         
         // Store in Redis for future requests (with optional expiration time)
-        await RedisConnection.Connection.AddAsync(redisKey, result, TimeSpan.FromMinutes(30));
+        await _cacheService.SetAsync(redisKey, result, TimeSpan.FromMinutes(30));
         
         return result;
     }

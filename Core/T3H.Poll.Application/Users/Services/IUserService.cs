@@ -2,4 +2,5 @@
 
 public interface IUserService : ICrudService<User>
 {
+    Task<IEnumerable<string>> GetPermissionsAsync(Guid userId, string key);
 }

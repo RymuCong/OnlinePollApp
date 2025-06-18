@@ -15,6 +15,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\CrossCuttingConcerns\T3H.Poll.CrossCuttingConcerns\T3H.Poll.CrossCuttingConcerns.csproj" />
 	  <ProjectReference Include="..\T3H.Poll.Domain\T3H.Poll.Domain.csproj" />
+	  <ProjectReference Include="..\..\Infrastructure\T3H.Poll.Infrastructure\T3H.Poll.Infrastructure.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

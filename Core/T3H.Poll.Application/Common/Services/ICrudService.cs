@@ -5,6 +5,7 @@ namespace T3H.Poll.Application.Common.Services;
 public interface ICrudService<T> where T : Entity<Guid>, IAggregateRoot
 {
     public IQueryable<T> GetQueryableSet();
+
     Task<List<T>> GetAsync(CancellationToken cancellationToken = default);
 
     IQueryable<T> GetQueryableSet(CancellationToken cancellationToken = default);
@@ -22,4 +23,6 @@ public interface ICrudService<T> where T : Entity<Guid>, IAggregateRoot
     Task UpdateAsync(T entity, CancellationToken cancellationToken = default);
 
     Task DeleteAsync(T entity, CancellationToken cancellationToken = default);
+
+    Task RemoveRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default);
 }
