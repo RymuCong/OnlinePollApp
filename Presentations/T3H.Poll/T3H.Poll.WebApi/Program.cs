@@ -12,6 +12,7 @@ using T3H.Poll.Infrastructure.Identity;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.IdentityModel.Tokens;
 using T3H.Poll.Application.Common.Mapping;
+using T3H.Poll.Infrastructure;
 using T3H.Poll.Infrastructure.Caching;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,8 +62,11 @@ services.AddPersistence(appSettings.ConnectionStrings.CRMDatabase)
 
 services.AddDataProtection()
     .SetApplicationName("T3H.Poll");
+services.AddDetection();
 
 services.AddIdentityCore();
+
+services.AddInfrastructureDependencies(configuration, builder.Environment.EnvironmentName);
 
 services.AddDateTimeProvider();
 

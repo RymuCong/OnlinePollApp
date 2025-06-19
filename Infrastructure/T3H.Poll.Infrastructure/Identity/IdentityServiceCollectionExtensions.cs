@@ -37,7 +37,9 @@ public static class IdentityServiceCollectionExtensions
         services.AddTransient<IUserStore<User>, UserStore>();
         services.AddTransient<IRoleStore<Role>, RoleStore>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
-
+        // Thêm các service cần thiết cho SignInManager
+        services.AddScoped<SignInManager<User>>();
+        
         ConfigureOptions(services);
 
         return services;

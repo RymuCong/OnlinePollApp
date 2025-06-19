@@ -11,7 +11,8 @@ public class UserStore : IUserStore<User>,
                          IUserLockoutStore<User>,
                          IUserAuthenticationTokenStore<User>,
                          IUserAuthenticatorKeyStore<User>,
-                         IUserTwoFactorRecoveryCodeStore<User>
+                         IUserTwoFactorRecoveryCodeStore<User>,
+                         IUserRoleStore<User>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserRepository _userRepository;
@@ -311,5 +312,43 @@ public class UserStore : IUserStore<User>,
         }
 
         return 0;
+    }
+
+    public Task AddToRoleAsync(User user, string roleName, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task RemoveFromRoleAsync(User user, string roleName, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IList<string>> GetRolesAsync(User user, CancellationToken cancellationToken)
+    {
+        // Todo: thiếu code
+        IList<string> roles = new List<string> { "admin" };
+        return Task.FromResult(roles);
+
+        //if (user == null)
+        //    throw new ArgumentNullException(nameof(user));
+
+        //// Lấy danh sách tên roles của user
+        //var roles = await _context.UserRoles
+        //    .Where(ur => ur.UserId == user.Id)
+        //    .Select(ur => ur.Role.Name)
+        //    .ToListAsync(cancellationToken);
+
+        //return roles;
+    }
+
+    public Task<bool> IsInRoleAsync(User user, string roleName, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IList<User>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 }

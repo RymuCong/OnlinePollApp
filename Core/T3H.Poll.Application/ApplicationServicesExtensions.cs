@@ -1,6 +1,7 @@
 ﻿using T3H.Poll.Application.Common;
 using T3H.Poll.Application.Common.Services;
 using T3H.Poll.Application.Polls.Services;
+using T3H.Poll.Application.Users.Services;
 
 namespace T3H.Poll.Application;
 
@@ -9,8 +10,8 @@ public static class ApplicationServicesExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, Action<Type, Type, ServiceLifetime> configureInterceptor = null)
     {
         services.AddScoped(typeof(ICrudService<>), typeof(CrudService<>))
-            .AddScoped<IPollService, PollService>();
-            // .AddScoped<IUserService, UserService>()
+            .AddScoped<IPollService, PollService>()
+            .AddScoped<IUserService, UserService>();
             // .AddScoped<IProductService, ProductService>()
             // .AddScoped<IContactService, ContactService>();
 
