@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using T3H.Poll.Application.Common.Mapping;
 using T3H.Poll.Infrastructure;
 using T3H.Poll.Infrastructure.Caching;
+using T3H.Poll.Infrastructure.Web.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -112,6 +113,7 @@ app.UseExceptionHandler(options => { });
 app.UseSwagger();
 app.UseRouting();
 app.MapGet("/", () => Results.LocalRedirect("~/swagger"));
+HttpContextCustom.SetupHttpContext(app);
 
 app.UseAuthentication();
 app.UseAuthorization();

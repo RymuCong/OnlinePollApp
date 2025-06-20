@@ -3,6 +3,7 @@
 public class PollResponse : PollRequest
 {
     public Guid Id { get; set; }
+    public Guid CreatorId { get; set; }
     public DateTimeOffset CreatedDateTime { get; set; }
     public DateTimeOffset UpdatedDateTime { get; set; }
     public string? UserNameUpdated { get; set; }

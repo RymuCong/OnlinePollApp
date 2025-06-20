@@ -7,7 +7,7 @@ using T3H.Poll.Application.Polls.Queries;
 namespace T3H.Poll.WebApi.Controllers.V1;
 
 [EnableRateLimiting(RateLimiterPolicyNames.DefaultPolicy)]
-// [Authorize]
+[Authorize]
 [Produces("application/json")]
 [ApiController]
 [ApiVersion("1.0")]
@@ -23,6 +23,8 @@ public class PollController : ControllerBase
 
     // [Authorize(AuthorizationPolicyNames.GetPollsPolicy)]
     [HttpGet("user/{creatorId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [MapToApiVersion("1.0")]
     public async Task<ActionResult<IEnumerable<Paged<PollResponse>>>> GetPollsByUserId(Guid creatorId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
