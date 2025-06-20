@@ -1,5 +1,6 @@
 ﻿using T3H.Poll.Application.Polls.DTOs;
 using T3H.Poll.Domain.Identity;
+using T3H.Poll.Infrastructure.Caching;
 
 namespace T3H.Poll.Application.Polls.Commands;
 
@@ -24,28 +25,32 @@ internal class AddUpdatePollCommandHandler : ICommandHandler<AddUpdatePollComman
 {
     private readonly ICrudService<Domain.Entities.Poll> _pollService;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ICurrentUser currentUser;
+    private readonly ICurrentUser _currentUser;
+    private readonly RedisCacheService _cacheService;
  
     public AddUpdatePollCommandHandler(
         IUnitOfWork unitOfWork,
         ICrudService<Domain.Entities.Poll> pollService,
-        ICurrentUser currentUser)
+        ICurrentUser currentUser,
+        RedisCacheService cacheService)
     {
         _unitOfWork = unitOfWork;
         _pollService = pollService;
-        this.currentUser = currentUser;
+        _currentUser = currentUser;
+        _cacheService = cacheService;
     }
 
     public async Task HandleAsync(AddUpdatePollCommand command, CancellationToken cancellationToken = default)
     {
         AddUpdatePollValidator.Validate(command);
+        Domain.Entities.Poll poll;
 
         using (await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken))
         {
-            var poll = Domain.Entities.Poll.Create(
+            poll = Domain.Entities.Poll.Create(
                 command.PollRequest.Title, 
                 command.PollRequest.Description, 
-                this.currentUser.UserId,
+                _currentUser.UserId,
                 command.PollRequest.StartTime, 
                 command.PollRequest.EndTime, 
                 command.PollRequest.IsActive,
@@ -58,8 +63,12 @@ internal class AddUpdatePollCommandHandler : ICommandHandler<AddUpdatePollComman
                 command.PollRequest.VotingCooldownMinutes);
     
             await _pollService.AddAsync(poll);
-
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
         }
+        
+        // delete cache
+        var redisKey = $"{RedisKeyConstants.GetPollsByUserId}:{_currentUser.UserId}";
+        await _cacheService.RemoveAsync(redisKey);
     }
+    
 }

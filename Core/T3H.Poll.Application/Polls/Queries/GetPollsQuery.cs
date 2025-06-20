@@ -4,12 +4,6 @@ using T3H.Poll.Infrastructure.Caching;
 
 namespace T3H.Poll.Application.Polls.Queries;
 
-// Redis key constants class
-public static class RedisKeyConstants
-{
-    public const string GetPollsByUserId = "polls:by-user-id";
-}
-
 public class GetPagedPollByUserIdQuery : IQuery<Paged<PollResponse>>
 {
     public Guid CreatorId { get; set; }
@@ -33,8 +27,7 @@ internal class GetPagedPollByUserIdQueryHandler : IQueryHandler<GetPagedPollByUs
     public async Task<Paged<PollResponse>> HandleAsync(GetPagedPollByUserIdQuery request, CancellationToken cancellationToken)
     {
         // Create a unique Redis key based on user ID, page and page size
-        var redisKey = $"{RedisKeyConstants.GetPollsByUserId}:{request.CreatorId}:{request.Page}:{request.PageSize}";
-        
+        var redisKey = $"{RedisKeyConstants.GetPollsByUserId}:{request.CreatorId}";
         // Try to get data from Redis first
         var cachedResult = await _cacheService.GetAsync<Paged<PollResponse>>(redisKey);
         if (cachedResult != null)
