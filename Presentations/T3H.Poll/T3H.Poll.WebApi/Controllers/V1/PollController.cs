@@ -1,8 +1,10 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
+﻿using Application.Common.Exceptions;
+using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using T3H.Poll.Application.Polls.Commands;
 using T3H.Poll.Application.Polls.DTOs;
 using T3H.Poll.Application.Polls.Queries;
+using T3H.Poll.Domain.Identity;
 
 namespace T3H.Poll.WebApi.Controllers.V1;
 
@@ -15,10 +17,12 @@ namespace T3H.Poll.WebApi.Controllers.V1;
 public class PollController : ControllerBase
 {
     private readonly Dispatcher _dispatcher;
+    private readonly ICurrentUser _currentUser;
 
-    public PollController(Dispatcher dispatcher)
+    public PollController(Dispatcher dispatcher, ICurrentUser currentUser)
     {
-        _dispatcher = dispatcher;
+        _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+        _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
     }
 
     // [Authorize(AuthorizationPolicyNames.GetPollsPolicy)]
@@ -70,65 +74,74 @@ public class PollController : ControllerBase
     }
     
     // Search by poll title, description, or creator
+    // To do: Fix admin authorization to allow searching all polls
     [HttpGet("search")]    
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [MapToApiVersion("1.0")]
     public async Task<ActionResult<ListResultModel<PollResponse>>> SearchPolls(
-        [FromQuery] string title = null,
-        [FromQuery] string description = null,
-        [FromQuery] Guid? creatorId = null,
-        [FromQuery] int page = 1, 
-        [FromQuery] int pageSize = 20)
+        [FromQuery] SearchPollsQueryParams queryParams)
     {
-        // Ensure at least one search parameter is provided
-        ValidationException.Requires(
-            !string.IsNullOrWhiteSpace(title) || 
-            !string.IsNullOrWhiteSpace(description) || 
-            (creatorId.HasValue && creatorId != Guid.Empty), 
-            "At least one search parameter must be provided");
-    
-        var polls = await _dispatcher.DispatchAsync(new SearchPollsQuery { 
-            Title = title, 
-            Description = description,
-            CreatorId = creatorId,
-            Page = page, 
-            PageSize = pageSize 
-        });
-    
-        return Ok(polls);
+        if (queryParams.CreatorId.HasValue && 
+            queryParams.CreatorId.Value != _currentUser.UserId)
+        {
+            return StatusCode(StatusCodes.Status404NotFound, 
+                "You can only view polls that you created");
+        }
+        
+        var query = new SearchPollsQuery(queryParams);
+        var result = await _dispatcher.DispatchAsync(query);
+        
+        if (!result.Items.Any())
+        {
+            return NotFound(ResultModel<ListResultModel<PollResponse>>.Create(null, true, "No polls found matching the search criteria.", 404));
+        }
+        
+        return Ok(result);
     }
+    
+    
     // [Authorize(AuthorizationPolicyNames.UpdatePollPolicy)]
-    // [HttpPut("{id}")]
-    // [Consumes("application/json")]
-    // [ProducesResponseType(StatusCodes.Status200OK)]
-    // [ProducesResponseType(StatusCodes.Status404NotFound)]
-    // [MapToApiVersion("1.0")]
-    // public async Task<ActionResult> Put(Guid id, [FromBody] PollDto model)
-    // {
-    //     var poll = await _dispatcher.DispatchAsync(new GetPollQuery { Id = id });
-    //
-    //     poll.UpdatePoll(
-    //         model.Title,
-    //         model.Description,
-    //         model.EndTime,
-    //         model.IsActive,
-    //         model.IsAnonymous,
-    //         model.IsMultipleVotesAllowed,
-    //         model.IsViewableByModerator,
-    //         model.IsPublic,
-    //         model.AccessCode,
-    //         model.ThemeSettings,
-    //         model.VotingFrequencyControl,
-    //         model.VotingCooldownMinutes,
-    //         User.Identity.Name ?? "system"
-    //     );
-    //
-    //     await _dispatcher.DispatchAsync(new AddUpdatePollCommand { Poll = poll });
-    //
-    //     model = poll.ToModel();
-    //     return Ok(model);
-    // }
+    [HttpPut("{id}")]
+    [Consumes("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [MapToApiVersion("1.0")]
+    public async Task<ActionResult> Put([FromBody] PollRequest request, Guid id)
+    {
+        try
+        {
+            ValidationException.Requires(id != Guid.Empty, "Invalid poll ID");
+        
+            await _dispatcher.DispatchAsync(new UpdatePollCommand 
+            { 
+                PollRequest = request, 
+                Id = id 
+            });
+        
+            return Ok(ResultModel<PollRequest>.Create(request, false, "Poll updated successfully", 200));
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ResultModel<PollRequest>.Create(request, true, ex.Message, 400));
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ResultModel<PollRequest>.Create(null, true, ex.Message, 404));
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, 
+                ResultModel<PollRequest>.Create(null, true, ex.Message, 403));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                ResultModel<PollRequest>.Create(null, true, $"Error updating poll: {ex.Message}", 500));
+        }
+    }
 
     // [Authorize(AuthorizationPolicyNames.DeletePollPolicy)]
     // [HttpDelete("{id}")]

@@ -1,55 +1,48 @@
 ﻿using System.Linq.Expressions;
-using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using T3H.Poll.Application.Common.Queries;
 using T3H.Poll.Application.Polls.DTOs;
 
 namespace T3H.Poll.Application.Polls.Queries;
 
-public class SearchPollsQuery : BaseSearchQuery<Domain.Entities.Poll, PollResponse>
+public class SearchPollsQuery : BaseSearchQuery<Domain.Entities.Poll, PollSearchResponse>
 {
-    public string Title { get; set; }
-    public string Description { get; set; }
-    public Guid? CreatorId { get; set; }
-    public int Page { get; set; } = 1;
-    public int PageSize { get; set; } = 20;
+    public SearchPollsQuery(SearchPollsQueryParams searchParams)
+    {
+        SearchRequest = searchParams.ToSearchRequestModel();
+    }
 
     public override Expression<Func<Domain.Entities.Poll, bool>> GetFilterExpression(SearchCondition condition)
     {
         return condition switch
         {
-            { Field: "title", Operator: "contains" } =>
-                p => p.Title.Contains((string)condition.Value),
-            
-            { Field: "description", Operator: "contains" } =>
-                p => p.Description.Contains((string)condition.Value),
-            
-            { Field: "creatorId", Operator: "eq" } =>
-                p => p.CreatorId == (Guid)condition.Value,
-                
-            { Field: "isActive", Operator: "eq" } =>
-                p => p.IsActive == (bool)condition.Value,
-                
-            { Field: "isPublic", Operator: "eq" } =>
-                p => p.IsPublic == (bool)condition.Value,
-                
+            {Field: "FieldSearch", Operator: "contains"}  =>
+                p => p.Title.Contains((string)condition.Value) || p.Description.Contains((string)condition.Value),
+
+            {Field: "CreatorId", Operator: "eq"} =>
+                p => p.CreatorId == Guid.Parse((string)condition.Value),
+
             _ => null
         };
     }
 
-    public override Expression<Func<Domain.Entities.Poll, PollResponse>> GetSelectExpression()
+    public override Expression<Func<Domain.Entities.Poll, PollSearchResponse>> GetSelectExpression()
     {
-        // return p => new PollResponse
-        // {
-        //     Id = p.Id,
-        //     Title = p.Title,
-        //     Description = p.Description,
-        //     CreatedDateTime = p.CreatedDateTime,
-        //     UserNameCreated = p.UserNameCreated,
-        //     IsActive = p.IsActive,
-        //     IsPublic = p.IsPublic,
-        // };
-        return null;
+        return poll => new PollSearchResponse
+        {
+            Id = poll.Id,
+            Title = poll.Title,
+            Description = poll.Description ?? string.Empty,
+            CreatorId = poll.CreatorId,
+            IsActive = poll.IsActive,
+            UpdatedDateTime = poll.UpdatedDateTime.HasValue ? poll.UpdatedDateTime.Value.DateTime : DateTime.MinValue,
+            IsPublic = poll.IsPublic,
+            IsAnonymous = poll.IsAnonymous,
+            IsMultipleVotesAllowed = poll.IsMultipleVotesAllowed,
+            IsViewableByModerator = poll.IsViewableByModerator,
+            StartTime = poll.StartTime,
+            EndTime = poll.EndTime ?? DateTime.MinValue,
+        };
     }
 
     public override IQueryable<Domain.Entities.Poll> AddIncludes(IQueryable<Domain.Entities.Poll> query)
@@ -73,7 +66,7 @@ public class SearchPollsQuery : BaseSearchQuery<Domain.Entities.Poll, PollRespon
     }
 }
 
-public class SearchPollsQueryHandler : BaseSearchQueryHandler<Domain.Entities.Poll, PollResponse, SearchPollsQuery>
+public class SearchPollsQueryHandler : BaseSearchQueryHandler<Domain.Entities.Poll, PollSearchResponse, SearchPollsQuery>
 {
     private readonly IRepository<Domain.Entities.Poll, Guid> _pollRepository;
     private readonly IMapper _mapper;
@@ -88,48 +81,51 @@ public class SearchPollsQueryHandler : BaseSearchQueryHandler<Domain.Entities.Po
         _mapper = mapper;
     }
 
-    public override async Task<ListResultModel<PollResponse>> HandleAsync(
+    public override async Task<ListResultModel<PollSearchResponse>> HandleAsync(
         SearchPollsQuery query,
         CancellationToken cancellationToken = default)
     {
         var baseQuery = _crudService.GetQueryableSet();
 
-        // Apply filters based on provided parameters
-        if (!string.IsNullOrWhiteSpace(query.Title))
+        // Apply filters from search conditions
+        var conditions = query.SearchRequest?.Conditions;
+        if (conditions != null)
         {
-            baseQuery = baseQuery.Where(p => p.Title.Contains(query.Title));
-        }
-
-        if (!string.IsNullOrWhiteSpace(query.Description))
-        {
-            baseQuery = baseQuery.Where(p => p.Description.Contains(query.Description));
-        }
-
-        if (query.CreatorId.HasValue && query.CreatorId != Guid.Empty)
-        {
-            baseQuery = baseQuery.Where(p => p.CreatorId == query.CreatorId);
+            foreach (var condition in conditions)
+            {
+                var predicate = query.GetFilterExpression(condition);
+                if (predicate != null)
+                {
+                    baseQuery = baseQuery.Where(predicate);
+                }
+            }
         }
 
         // Apply sorting
-        var sortedQuery = query.ApplySort(baseQuery, query.SearchRequest?.SortField ?? "createddatetime", 
+        var sortedQuery = query.ApplySort(baseQuery, query.SearchRequest?.SortField ?? "updateddatetime",
             query.SearchRequest?.IsDescending ?? true);
 
         // Get total count
         var totalItems = await sortedQuery.CountAsync(cancellationToken);
 
         // Apply paging
+        int page = query.SearchRequest?.PageNumber ?? 1;
+        int pageSize = query.SearchRequest?.PageSize ?? 10;
+
+        // Use the select expression defined in the query instead of ProjectTo
+        var selectExpression = query.GetSelectExpression();
         var items = await sortedQuery
-            .Skip((query.Page - 1) * query.PageSize)
-            .Take(query.PageSize)
-            .ProjectTo<PollResponse>(_mapper.ConfigurationProvider)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(selectExpression)
             .ToListAsync(cancellationToken);
 
-        return ListResultModel<PollResponse>.Create(
+        return ListResultModel<PollSearchResponse>.Create(
             items,
             totalItems,
-            query.Page,
-            query.PageSize,
-            (int)Math.Ceiling(totalItems / (double)query.PageSize)
+            page,
+            pageSize,
+            (int)Math.Ceiling(totalItems / (double)pageSize)
         );
     }
 }
