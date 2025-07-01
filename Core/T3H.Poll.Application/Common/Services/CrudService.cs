@@ -73,6 +73,7 @@ public class CrudService<T> : ICrudService<T> where T : Entity<Guid>, IAggregate
     {
         try
         {
+            entity.UserNameUpdated = HttpContextCustom.Current?.User?.Claims.Where(c => c.Type == ClaimTypes.Email).FirstOrDefault()?.Value;
             await _repository.UpdateAsync(entity, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             await _dispatcher.DispatchAsync(new EntityUpdatedEvent<T>(entity, DateTime.UtcNow), cancellationToken);

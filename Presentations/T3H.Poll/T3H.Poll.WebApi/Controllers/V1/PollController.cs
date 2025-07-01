@@ -213,7 +213,7 @@ public class PollController : ControllerBase
     //     }
     // }
     //
-    [HttpPost("{pollId}/questions")]
+    [HttpPost("questions/{pollId}")]
     [Consumes("application/json")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -246,61 +246,43 @@ public class PollController : ControllerBase
             return BadRequest(ResultModel<Guid>.Create(Guid.Empty, true, ex.Message, 400));
         }
     }
-    //
-    // [HttpPut("questions/{questionId}")]
-    // [Consumes("application/json")]
-    // [ProducesResponseType(StatusCodes.Status200OK)]
-    // [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    // [ProducesResponseType(StatusCodes.Status404NotFound)]
-    // [MapToApiVersion("1.0")]
-    // public async Task<ActionResult<ResultModel<bool>>> UpdateQuestion(Guid questionId, [FromBody] QuestionRequest request)
-    // {
-    //     ValidationException.Requires(questionId != Guid.Empty, "Invalid Question Id");
-    //     
-    //     try
-    //     {
-    //         var command = new UpdateQuestionCommand
-    //         {
-    //             Id = questionId,
-    //             QuestionText = request.QuestionText,
-    //             QuestionType = request.QuestionType,
-    //             IsRequired = request.IsRequired,
-    //             QuestionOrder = request.QuestionOrder,
-    //             MediaUrl = request.MediaUrl,
-    //             Settings = request.Settings,
-    //             Choices = request.Choices?.Select(c => new UpdateChoiceModel
-    //             {
-    //                 Id = c.Id,
-    //                 ChoiceText = c.ChoiceText,
-    //                 ChoiceOrder = c.ChoiceOrder,
-    //                 IsCorrect = c.IsCorrect,
-    //                 MediaUrl = c.MediaUrl,
-    //                 IsActive = c.IsActive
-    //             }).ToList() ?? new List<UpdateChoiceModel>()
-    //         };
-    //         
-    //         var result = await _dispatcher.DispatchAsync(command);
-    //         return Ok(ResultModel<bool>.Create(result));
-    //     }
-    //     catch (ValidationException ex)
-    //     {
-    //         return BadRequest(ResultModel<bool>.Create(false, true, ex.Message, 400));
-    //     }
-    //     catch (ForbiddenException ex)
-    //     {
-    //         return StatusCode(StatusCodes.Status403Forbidden, 
-    //             ResultModel<bool>.Create(false, true, ex.Message, 403));
-    //     }
-    //     catch (NotFoundException ex)
-    //     {
-    //         return NotFound(ResultModel<bool>.Create(false, true, ex.Message, 404));
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return BadRequest(ResultModel<bool>.Create(false, true, ex.Message, 400));
-    //     }
-    // }
-    //
+    
+    [HttpPut("questions/{pollId}")]
+    [Consumes("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [MapToApiVersion("1.0")]
+    public async Task<ActionResult<ResultModel<bool>>> UpdateQuestions(Guid pollId, [FromBody] ICollection<QuestionUpdateRequest> requests)
+    {
+        try
+        {
+            ValidationException.Requires(pollId != Guid.Empty, "Invalid Poll Id");
+            ValidationException.Requires(requests.Any(), "At least one question must be provided");
+
+            await _dispatcher.DispatchAsync(new UpdateQuestionCommand(pollId, requests));
+        
+            return Ok(ResultModel<bool>.Create(true, false, "Questions updated successfully"));
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ResultModel<bool>.Create(false, true, ex.Message, 400));
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, 
+                ResultModel<bool>.Create(false, true, ex.Message, 403));
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ResultModel<bool>.Create(false, true, ex.Message, 404));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ResultModel<bool>.Create(false, true, ex.Message, 400));
+        }
+    }
+    
     // [HttpDelete("questions/{questionId}")]
     // [ProducesResponseType(StatusCodes.Status200OK)]
     // [ProducesResponseType(StatusCodes.Status404NotFound)]

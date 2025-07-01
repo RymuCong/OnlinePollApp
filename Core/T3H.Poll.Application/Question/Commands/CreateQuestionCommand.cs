@@ -138,7 +138,7 @@ internal class CreateQuestionCommandHandler : ICommandHandler<CreateQuestionComm
                             choiceModel.ChoiceText,
                             choiceModel.ChoiceOrder,
                             choiceModel.IsCorrect,
-                            choiceModel.MediaUrl
+                            choiceModel.MediaUrl ?? string.Empty
                         );
                         
                         await _choiceService.AddAsync(choice);

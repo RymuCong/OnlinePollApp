@@ -8,4 +8,6 @@ public class AnonymousUser : ICurrentUser
     public bool IsAuthenticated => false;
 
     public Guid UserId => Guid.Empty;
+    
+    public string Email => "Anonymous";
 }

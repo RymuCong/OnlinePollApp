@@ -21,6 +21,8 @@ public class Question : Entity<Guid>, IAggregateRoot
     public string? Settings { get; set; }
 
     public List<Choice> Choices { get; set; }
+    
+    public bool IsActive { get; set; }
 
     #region Constructor
     public Question()
@@ -43,8 +45,8 @@ public class Question : Entity<Guid>, IAggregateRoot
         MediaUrl = mediaUrl;
         Settings = settings;
         CreatedDateTime = DateTimeOffset.UtcNow;
-        UserNameCreated = "System";
         Choices = new List<Choice>();
+        IsActive = true;
     }
     #endregion
 
@@ -58,7 +60,6 @@ public class Question : Entity<Guid>, IAggregateRoot
         MediaUrl = mediaUrl;
         Settings = settings;
         UpdatedDateTime = DateTimeOffset.UtcNow;
-        UserNameCreated = "System";
     }
 
     public bool ValidateQuestion()
@@ -75,7 +76,7 @@ public class Question : Entity<Guid>, IAggregateRoot
 
         if (PollId == Guid.Empty)
         {
-            throw new ArgumentException("Vote ID cannot be empty.");
+            throw new ArgumentException("Poll ID cannot be empty.");
         }
 
         return true;
@@ -86,4 +87,10 @@ public class Question : Entity<Guid>, IAggregateRoot
         return Choices.Where(c => c.IsActive == true).ToList();
     }
     #endregion
+
+    public void DeactivateQuestion()
+    {
+        IsActive = false;
+        UpdatedDateTime = DateTimeOffset.UtcNow;
+    }
 }

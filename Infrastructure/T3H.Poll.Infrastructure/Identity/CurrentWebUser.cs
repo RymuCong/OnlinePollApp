@@ -29,6 +29,15 @@ public class CurrentWebUser : ICurrentUser
         }
     }
 
+    public string Email
+    {
+        get
+        {
+            return _context.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+                   ?? _context.HttpContext.User.FindFirst("email")?.Value;
+        }
+    }
+
     public string GetClientIp(HttpContext httpContext)
     {
         return httpContext.Connection.RemoteIpAddress?.ToString();
