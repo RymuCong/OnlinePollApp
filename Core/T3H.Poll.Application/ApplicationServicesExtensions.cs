@@ -1,6 +1,8 @@
-﻿using T3H.Poll.Application.Common;
+﻿using T3H.Poll.Application.Choice.Services;
+using T3H.Poll.Application.Common;
 using T3H.Poll.Application.Common.Services;
 using T3H.Poll.Application.Polls.Services;
+using T3H.Poll.Application.Question.Services;
 using T3H.Poll.Application.Users.Services;
 
 namespace T3H.Poll.Application;
@@ -11,7 +13,9 @@ public static class ApplicationServicesExtensions
     {
         services.AddScoped(typeof(ICrudService<>), typeof(CrudService<>))
             .AddScoped<IPollService, PollService>()
-            .AddScoped<IUserService, UserService>();
+            .AddScoped<IUserService, UserService>()
+            .AddScoped<IQuestionService, QuestionService>()
+            .AddScoped<IChoiceService, ChoiceService>();
             // .AddScoped<IProductService, ProductService>()
             // .AddScoped<IContactService, ContactService>();
 

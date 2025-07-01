@@ -7,12 +7,20 @@ namespace T3H.Poll.Application.Question.Commands;
 public class CreateQuestionCommand : ICommand
 {
     public Guid PollId { get; set; }
-    public QuestionRequest QuestionRequest { get; set; }
+    public ICollection<QuestionRequest> QuestionRequests { get; set; }
+    
+    public CreateQuestionCommand(Guid pollId, ICollection<QuestionRequest> questionRequests)
+    {
+        PollId = pollId;
+        QuestionRequests = questionRequests ?? throw new ArgumentNullException(nameof(questionRequests), "Question requests collection cannot be null");
+        
+        if (!questionRequests.Any())
+            throw new ArgumentException("At least one question must be provided", nameof(questionRequests));
+    }
 }
 
 public class CreateQuestionValidator
 {
-    // Get all valid question type names as strings for validation
     private static readonly string[] ValidQuestionTypes = Enum.GetNames(typeof(QuestionType));
     
     private static readonly QuestionType[] TypesRequiringChoices = { 
@@ -28,32 +36,37 @@ public class CreateQuestionValidator
     public static void Validate(CreateQuestionCommand command)
     {
         ValidationException.Requires(command.PollId != Guid.Empty, "Vote ID không được để trống.");
-        ValidationException.NotNullOrWhiteSpace(command.QuestionRequest.QuestionText, "Nội dung câu hỏi không được để trống.");
-        ValidationException.NotNullOrWhiteSpace(command.QuestionRequest.QuestionType, "Loại câu hỏi không được để trống.");
-
-        // Parse the string to enum
-        if (!Enum.TryParse<QuestionType>(command.QuestionRequest.QuestionType, true, out QuestionType questionType))
+        ValidationException.Requires(command.QuestionRequests != null && command.QuestionRequests.Any(), "Phải có ít nhất một câu hỏi.");
+        
+        foreach (var questionRequest in command.QuestionRequests)
         {
-            throw new ValidationException($"Loại câu hỏi không hợp lệ. Loại câu hỏi phải là một trong: {string.Join(", ", ValidQuestionTypes)}");
-        }
+            ValidationException.NotNullOrWhiteSpace(questionRequest.QuestionText, "Nội dung câu hỏi không được để trống.");
+            ValidationException.NotNullOrWhiteSpace(questionRequest.QuestionType, "Loại câu hỏi không được để trống.");
 
-        // Use the parsed enum value for comparison
-        if (TypesRequiringChoices.Contains(questionType))
-        {
-            if (command.QuestionRequest.Choices == null || !command.QuestionRequest.Choices.Any())
+            // Parse the string to enum
+            if (!Enum.TryParse<QuestionType>(questionRequest.QuestionType, true, out QuestionType questionType))
             {
-                throw new ValidationException($"Câu hỏi loại {questionType} phải có ít nhất một lựa chọn.");
+                throw new ValidationException($"Loại câu hỏi không hợp lệ. Loại câu hỏi phải là một trong: {string.Join(", ", ValidQuestionTypes)}");
             }
 
-            foreach (var choice in command.QuestionRequest.Choices)
+            // Use the parsed enum value for comparison
+            if (TypesRequiringChoices.Contains(questionType))
             {
-                ValidationException.NotNullOrWhiteSpace(choice.ChoiceText, "Nội dung lựa chọn không được để trống.");
+                if (questionRequest.Choices == null || !questionRequest.Choices.Any())
+                {
+                    throw new ValidationException($"Câu hỏi loại {questionType} phải có ít nhất một lựa chọn.");
+                }
+
+                foreach (var choice in questionRequest.Choices)
+                {
+                    ValidationException.NotNullOrWhiteSpace(choice.ChoiceText, "Nội dung lựa chọn không được để trống.");
+                }
             }
         }
     }
 }
 
-internal class CreateQuestionCommandHandler : ICommandHandler<CreateQuestionCommand, Guid>
+internal class CreateQuestionCommandHandler : ICommandHandler<CreateQuestionCommand>
 {
     private readonly ICrudService<Domain.Entities.Question> _questionService;
     private readonly ICrudService<Domain.Entities.Choice> _choiceService;
@@ -75,7 +88,7 @@ internal class CreateQuestionCommandHandler : ICommandHandler<CreateQuestionComm
         _currentUser = currentUser;
     }
 
-    public async Task<Guid> HandleAsync(CreateQuestionCommand command, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(CreateQuestionCommand command, CancellationToken cancellationToken = default)
     {
         CreateQuestionValidator.Validate(command);
 
@@ -92,49 +105,48 @@ internal class CreateQuestionCommandHandler : ICommandHandler<CreateQuestionComm
             throw new ForbiddenException("Bạn chỉ có thể tạo câu hỏi cho poll mà bạn đã tạo");
         }
 
-        Domain.Entities.Question question;
-
         using (await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken))
         {
-            // Parse string to enum
-            if (!Enum.TryParse<QuestionType>(command.QuestionRequest.QuestionType, true, out QuestionType questionType))
+            foreach (var questionRequest in command.QuestionRequests)
             {
-                throw new ValidationException($"Invalid question type: {command.QuestionRequest.QuestionType}");
-            }
-            
-            // Create question
-            question = new Domain.Entities.Question(
-                command.PollId,
-                command.QuestionRequest.QuestionText,
-                questionType, // Pass the parsed enum value
-                command.QuestionRequest.IsRequired,
-                command.QuestionRequest.QuestionOrder,
-                command.QuestionRequest.MediaUrl,
-                command.QuestionRequest.Settings
-            );
-            
-            await _questionService.AddAsync(question);
-            
-            // Create choices if provided
-            if (command.QuestionRequest.Choices != null && command.QuestionRequest.Choices.Any())
-            {
-                foreach (var choiceModel in command.QuestionRequest.Choices)
+                // Parse string to enum
+                if (!Enum.TryParse<QuestionType>(questionRequest.QuestionType, true, out QuestionType questionType))
                 {
-                    var choice = new Domain.Entities.Choice(
-                        question.Id,
-                        choiceModel.ChoiceText,
-                        choiceModel.ChoiceOrder,
-                        choiceModel.IsCorrect,
-                        choiceModel.MediaUrl
-                    );
-                    
-                    await _choiceService.AddAsync(choice);
+                    throw new ValidationException($"Invalid question type: {questionRequest.QuestionType}");
+                }
+                
+                // Create question
+                var question = new Domain.Entities.Question(
+                    command.PollId,
+                    questionRequest.QuestionText,
+                    questionType,
+                    questionRequest.IsRequired,
+                    questionRequest.QuestionOrder,
+                    questionRequest.MediaUrl ?? string.Empty,
+                    questionRequest.Settings ?? string.Empty
+                );
+                
+                await _questionService.AddAsync(question);
+                
+                // Create choices if provided
+                if (questionRequest.Choices != null && questionRequest.Choices.Any())
+                {
+                    foreach (var choiceModel in questionRequest.Choices)
+                    {
+                        var choice = new Domain.Entities.Choice(
+                            question.Id,
+                            choiceModel.ChoiceText,
+                            choiceModel.ChoiceOrder,
+                            choiceModel.IsCorrect,
+                            choiceModel.MediaUrl
+                        );
+                        
+                        await _choiceService.AddAsync(choice);
+                    }
                 }
             }
             
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
         }
-        
-        return question.Id;
     }
 }

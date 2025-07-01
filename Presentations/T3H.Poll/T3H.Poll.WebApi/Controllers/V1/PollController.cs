@@ -218,15 +218,15 @@ public class PollController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [MapToApiVersion("1.0")]
-    public async Task<ActionResult<ResultModel<Guid>>> CreateQuestion(Guid pollId, [FromBody] QuestionRequest request)
+    public async Task<ActionResult<ResultModel<Guid>>> CreateQuestions(Guid pollId, [FromBody] ICollection<QuestionRequest> requests)
     {
         ValidationException.Requires(pollId != Guid.Empty, "Invalid Poll Id");
-        
+        ValidationException.Requires(requests != null && requests.Any(), "At least one question must be provided");
+    
         try
         {
-            await _dispatcher.DispatchAsync(new CreateQuestionCommand {PollId = pollId, QuestionRequest = request});
-            // return Created($"/api/v1/Poll/questions/", ResultModel<Guid>.Create(pollId, false, "Question created successfully", 201));
-            return Ok(ResultModel<Guid>.Create(pollId, false, "Question created successfully", 201));
+            await _dispatcher.DispatchAsync(new CreateQuestionCommand(pollId, requests));
+            return Ok(ResultModel<Guid>.Create(pollId, false, $"{requests.Count} question(s) created successfully", 201));
         }
         catch (ValidationException ex)
         {

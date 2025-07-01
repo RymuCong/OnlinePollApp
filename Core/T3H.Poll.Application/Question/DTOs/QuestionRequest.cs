@@ -20,6 +20,6 @@ public class ChoiceRequest
     public string ChoiceText { get; set; }
     public int? ChoiceOrder { get; set; }
     public bool? IsCorrect { get; set; }
-    public string MediaUrl { get; set; }
+    public string? MediaUrl { get; set; }
     public bool? IsActive { get; set; } = true;
 }

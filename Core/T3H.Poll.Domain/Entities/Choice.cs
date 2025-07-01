@@ -15,7 +15,7 @@ public class Choice : Entity<Guid>, IAggregateRoot
 
     public bool? IsCorrect { get; set; }
 
-    [StringLength(255)]
+    [StringLength(500)]
     public string? MediaUrl { get; set; }
 
     public bool? IsActive { get; set; }
@@ -28,7 +28,7 @@ public class Choice : Entity<Guid>, IAggregateRoot
         IsActive = true;
     }
 
-    public Choice(Guid questionId, string choiceText, int? choiceOrder, bool? isCorrect, string mediaUrl)
+    public Choice(Guid questionId, string choiceText, int? choiceOrder, bool? isCorrect, string? mediaUrl)
     {
         Id = Guid.NewGuid();
         QuestionId = questionId;
