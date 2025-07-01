@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using T3H.Poll.Persistence;
 
@@ -11,9 +12,11 @@ using T3H.Poll.Persistence;
 namespace T3H.Poll.Migration.Migrations
 {
     [DbContext(typeof(CrmDbContext))]
-    partial class CrmDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250626165812_UpdateQuestion")]
+    partial class UpdateQuestion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -710,6 +713,7 @@ namespace T3H.Poll.Migration.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("MediaUrl")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
@@ -733,6 +737,7 @@ namespace T3H.Poll.Migration.Migrations
                         .HasColumnType("rowversion");
 
                     b.Property<string>("Settings")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTimeOffset?>("UpdatedDateTime")

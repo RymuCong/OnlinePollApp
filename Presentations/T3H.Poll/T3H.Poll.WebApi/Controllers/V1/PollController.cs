@@ -1,9 +1,9 @@
 ﻿using Application.Common.Exceptions;
-using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml.Wordprocessing;
 using T3H.Poll.Application.Polls.Commands;
 using T3H.Poll.Application.Polls.DTOs;
 using T3H.Poll.Application.Polls.Queries;
+using T3H.Poll.Application.Question.Commands;
+using T3H.Poll.Application.Question.DTOs;
 using T3H.Poll.Domain.Identity;
 
 namespace T3H.Poll.WebApi.Controllers.V1;
@@ -154,5 +154,178 @@ public class PollController : ControllerBase
     //     await _dispatcher.DispatchAsync(new DeletePollCommand { Poll = poll });
     //
     //     return Ok();
+    // }
+    
+    // Question APIs
+    // [HttpGet("{pollId}/questions")]
+    // [ProducesResponseType(StatusCodes.Status200OK)]
+    // [ProducesResponseType(StatusCodes.Status404NotFound)]
+    // [MapToApiVersion("1.0")]
+    // public async Task<ActionResult<List<QuestionDto>>> GetQuestionsByPollId(Guid pollId)
+    // {
+    //     ValidationException.Requires(pollId != Guid.Empty, "Invalid Poll Id");
+    //     
+    //     try
+    //     {
+    //         var questions = await _dispatcher.DispatchAsync(new GetQuestionsByPollIdQuery { PollId = pollId });
+    //         return Ok(questions);
+    //     }
+    //     catch (NotFoundException ex)
+    //     {
+    //         return NotFound(ResultModel<List<QuestionDto>>.Create(null, true, ex.Message, 404));
+    //     }
+    //     catch (ForbiddenException ex)
+    //     {
+    //         return StatusCode(StatusCodes.Status403Forbidden, 
+    //             ResultModel<List<QuestionDto>>.Create(null, true, ex.Message, 403));
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return BadRequest(ResultModel<List<QuestionDto>>.Create(null, true, ex.Message, 400));
+    //     }
+    // }
+    
+    // [HttpGet("questions/{questionId}")]
+    // [ProducesResponseType(StatusCodes.Status200OK)]
+    // [ProducesResponseType(StatusCodes.Status404NotFound)]
+    // [MapToApiVersion("1.0")]
+    // public async Task<ActionResult<QuestionDto>> GetQuestionById(Guid questionId)
+    // {
+    //     ValidationException.Requires(questionId != Guid.Empty, "Invalid Question Id");
+    //     
+    //     try
+    //     {
+    //         var question = await _dispatcher.DispatchAsync(new GetQuestionByIdQuery { Id = questionId });
+    //         return Ok(question);
+    //     }
+    //     catch (NotFoundException ex)
+    //     {
+    //         return NotFound(ResultModel<QuestionDto>.Create(null, true, ex.Message, 404));
+    //     }
+    //     catch (ForbiddenException ex)
+    //     {
+    //         return StatusCode(StatusCodes.Status403Forbidden, 
+    //             ResultModel<QuestionDto>.Create(null, true, ex.Message, 403));
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return BadRequest(ResultModel<QuestionDto>.Create(null, true, ex.Message, 400));
+    //     }
+    // }
+    //
+    [HttpPost("{pollId}/questions")]
+    [Consumes("application/json")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [MapToApiVersion("1.0")]
+    public async Task<ActionResult<ResultModel<Guid>>> CreateQuestion(Guid pollId, [FromBody] QuestionRequest request)
+    {
+        ValidationException.Requires(pollId != Guid.Empty, "Invalid Poll Id");
+        
+        try
+        {
+            await _dispatcher.DispatchAsync(new CreateQuestionCommand {PollId = pollId, QuestionRequest = request});
+            // return Created($"/api/v1/Poll/questions/", ResultModel<Guid>.Create(pollId, false, "Question created successfully", 201));
+            return Ok(ResultModel<Guid>.Create(pollId, false, "Question created successfully", 201));
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ResultModel<Guid>.Create(Guid.Empty, true, ex.Message, 400));
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, 
+                ResultModel<Guid>.Create(Guid.Empty, true, ex.Message, 403));
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ResultModel<Guid>.Create(Guid.Empty, true, ex.Message, 404));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ResultModel<Guid>.Create(Guid.Empty, true, ex.Message, 400));
+        }
+    }
+    //
+    // [HttpPut("questions/{questionId}")]
+    // [Consumes("application/json")]
+    // [ProducesResponseType(StatusCodes.Status200OK)]
+    // [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    // [ProducesResponseType(StatusCodes.Status404NotFound)]
+    // [MapToApiVersion("1.0")]
+    // public async Task<ActionResult<ResultModel<bool>>> UpdateQuestion(Guid questionId, [FromBody] QuestionRequest request)
+    // {
+    //     ValidationException.Requires(questionId != Guid.Empty, "Invalid Question Id");
+    //     
+    //     try
+    //     {
+    //         var command = new UpdateQuestionCommand
+    //         {
+    //             Id = questionId,
+    //             QuestionText = request.QuestionText,
+    //             QuestionType = request.QuestionType,
+    //             IsRequired = request.IsRequired,
+    //             QuestionOrder = request.QuestionOrder,
+    //             MediaUrl = request.MediaUrl,
+    //             Settings = request.Settings,
+    //             Choices = request.Choices?.Select(c => new UpdateChoiceModel
+    //             {
+    //                 Id = c.Id,
+    //                 ChoiceText = c.ChoiceText,
+    //                 ChoiceOrder = c.ChoiceOrder,
+    //                 IsCorrect = c.IsCorrect,
+    //                 MediaUrl = c.MediaUrl,
+    //                 IsActive = c.IsActive
+    //             }).ToList() ?? new List<UpdateChoiceModel>()
+    //         };
+    //         
+    //         var result = await _dispatcher.DispatchAsync(command);
+    //         return Ok(ResultModel<bool>.Create(result));
+    //     }
+    //     catch (ValidationException ex)
+    //     {
+    //         return BadRequest(ResultModel<bool>.Create(false, true, ex.Message, 400));
+    //     }
+    //     catch (ForbiddenException ex)
+    //     {
+    //         return StatusCode(StatusCodes.Status403Forbidden, 
+    //             ResultModel<bool>.Create(false, true, ex.Message, 403));
+    //     }
+    //     catch (NotFoundException ex)
+    //     {
+    //         return NotFound(ResultModel<bool>.Create(false, true, ex.Message, 404));
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return BadRequest(ResultModel<bool>.Create(false, true, ex.Message, 400));
+    //     }
+    // }
+    //
+    // [HttpDelete("questions/{questionId}")]
+    // [ProducesResponseType(StatusCodes.Status200OK)]
+    // [ProducesResponseType(StatusCodes.Status404NotFound)]
+    // [MapToApiVersion("1.0")]
+    // public async Task<ActionResult<ResultModel<bool>>> DeleteQuestion(Guid questionId)
+    // {
+    //     ValidationException.Requires(questionId != Guid.Empty, "Invalid Question Id");
+    //     
+    //     try
+    //     {
+    //         var result = await _dispatcher.DispatchAsync(new DeleteQuestionCommand { Id = questionId });
+    //         return Ok(ResultModel<bool>.Create(result));
+    //     }
+    //     catch (ForbiddenException ex)
+    //     {
+    //         return StatusCode(StatusCodes.Status403Forbidden, 
+    //             ResultModel<bool>.Create(false, true, ex.Message, 403));
+    //     }
+    //     catch (NotFoundException ex)
+    //     {
+    //         return NotFound(ResultModel<bool>.Create(false, true, ex.Message, 404));
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return BadRequest(ResultModel<bool>.Create(false, true, ex.Message, 400));
+    //     }
     // }
 }

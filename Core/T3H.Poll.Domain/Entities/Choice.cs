@@ -3,7 +3,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-public class Choice : Entity<Guid>
+public class Choice : Entity<Guid>, IAggregateRoot
 {
     [Required]
     public Guid QuestionId { get; set; }
@@ -28,7 +28,7 @@ public class Choice : Entity<Guid>
         IsActive = true;
     }
 
-    public Choice(Guid questionId, string choiceText, int? choiceOrder, bool? isCorrect, string mediaUrl, string createdBy)
+    public Choice(Guid questionId, string choiceText, int? choiceOrder, bool? isCorrect, string mediaUrl)
     {
         Id = Guid.NewGuid();
         QuestionId = questionId;
@@ -37,20 +37,20 @@ public class Choice : Entity<Guid>
         IsCorrect = isCorrect;
         MediaUrl = mediaUrl;
         CreatedDateTime = DateTimeOffset.UtcNow;
-        UserNameCreated = createdBy;
+        UserNameCreated = "System";
         IsActive = true;
     }
     #endregion
 
     #region Business Logic
-    public void UpdateChoice(string choiceText, int? choiceOrder, bool? isCorrect, string mediaUrl, string updatedBy)
+    public void UpdateChoice(string choiceText, int? choiceOrder, bool? isCorrect, string mediaUrl)
     {
         ChoiceText = choiceText;
         ChoiceOrder = choiceOrder;
         IsCorrect = isCorrect;
         MediaUrl = mediaUrl;
         UpdatedDateTime = DateTimeOffset.UtcNow;
-        UserNameUpdated = updatedBy;
+        UserNameUpdated = "System";
     }
 
     public void DeactivateChoice()

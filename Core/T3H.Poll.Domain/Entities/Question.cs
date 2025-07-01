@@ -1,25 +1,24 @@
 ﻿namespace T3H.Poll.Domain.Entities;
 
-public class Question : Entity<Guid>
+public class Question : Entity<Guid>, IAggregateRoot
 {
     [Required]
-    public Guid VoteId { get; set; }
+    public Guid PollId { get; set; }
 
     [Required]
     public string QuestionText { get; set; }
 
     [Required]
-    [StringLength(50)]
-    public string QuestionType { get; set; }
+    public QuestionType QuestionType { get; set; }
 
     public bool IsRequired { get; set; }
 
     public int QuestionOrder { get; set; }
 
     [StringLength(255)]
-    public string MediaUrl { get; set; }
-
-    public string Settings { get; set; }
+    public string? MediaUrl { get; set; }
+    
+    public string? Settings { get; set; }
 
     public List<Choice> Choices { get; set; }
 
@@ -33,10 +32,10 @@ public class Question : Entity<Guid>
         Choices = new List<Choice>();
     }
 
-    public Question(Guid voteId, string questionText, string questionType, bool isRequired, int questionOrder, string mediaUrl, string settings, string createdBy)
+    public Question(Guid pollId, string questionText, QuestionType questionType, bool isRequired, int questionOrder, string mediaUrl, string settings)
     {
         Id = Guid.NewGuid();
-        VoteId = voteId;
+        PollId = pollId;
         QuestionText = questionText;
         QuestionType = questionType;
         IsRequired = isRequired;
@@ -44,13 +43,13 @@ public class Question : Entity<Guid>
         MediaUrl = mediaUrl;
         Settings = settings;
         CreatedDateTime = DateTimeOffset.UtcNow;
-        UserNameCreated = createdBy;
+        UserNameCreated = "System";
         Choices = new List<Choice>();
     }
     #endregion
 
     #region Business Logic
-    public void UpdateQuestion(string questionText, string questionType, bool isRequired, int questionOrder, string mediaUrl, string settings, string updatedBy)
+    public void UpdateQuestion(string questionText, QuestionType questionType, bool isRequired, int questionOrder, string mediaUrl, string settings)
     {
         QuestionText = questionText;
         QuestionType = questionType;
@@ -59,7 +58,7 @@ public class Question : Entity<Guid>
         MediaUrl = mediaUrl;
         Settings = settings;
         UpdatedDateTime = DateTimeOffset.UtcNow;
-        UserNameUpdated = updatedBy;
+        UserNameCreated = "System";
     }
 
     public bool ValidateQuestion()
@@ -69,12 +68,12 @@ public class Question : Entity<Guid>
             throw new ArgumentException("Question text cannot be empty.");
         }
 
-        if (string.IsNullOrWhiteSpace(QuestionType))
+        if (!Enum.IsDefined(typeof(QuestionType), QuestionType))
         {
-            throw new ArgumentException("Question type cannot be empty.");
+            throw new ArgumentException("Invalid question type.");
         }
 
-        if (string.IsNullOrWhiteSpace(VoteId.ToString()))
+        if (PollId == Guid.Empty)
         {
             throw new ArgumentException("Vote ID cannot be empty.");
         }
