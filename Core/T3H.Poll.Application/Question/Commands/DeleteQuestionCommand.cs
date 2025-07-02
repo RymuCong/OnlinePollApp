@@ -89,7 +89,7 @@ internal class DeleteQuestionCommandHandler : ICommandHandler<DeleteQuestionComm
 
         using (await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken))
         {
-            await _questionService.SoftDeleteQuestionsAsync(questionsInPoll, cancellationToken);
+            await _questionService.SoftDeleteQuestionsAndChoicesAsync(questionsInPoll, cancellationToken);
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
         }
     }

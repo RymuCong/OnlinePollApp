@@ -16,7 +16,7 @@ public class QuestionService : CrudService<Domain.Entities.Question>, IQuestionS
             .ToListAsync(cancellationToken);
     }
 
-    public async Task SoftDeleteQuestionsAsync(List<Domain.Entities.Question> questions, CancellationToken cancellationToken = default)
+    public async Task SoftDeleteQuestionsAndChoicesAsync(List<Domain.Entities.Question> questions, CancellationToken cancellationToken = default)
     {
         foreach (var question in questions)
         {
@@ -56,4 +56,26 @@ public class QuestionService : CrudService<Domain.Entities.Question>, IQuestionS
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Domain.Entities.Question>> GetQuestionsByPollIdAsync(Guid pollId, CancellationToken cancellationToken = default)
+    {
+        return await GetQueryableSet()
+            .Where(q => q.PollId == pollId && q.IsDeleted != true)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task SoftDeleteQuestionsAsync(List<Guid> questionIds, CancellationToken cancellationToken = default)
+    {
+        var questions = await GetQueryableSet()
+            .Where(q => questionIds.Contains(q.Id))
+            .ToListAsync(cancellationToken);
+
+        foreach (var question in questions)
+        {
+            question.IsDeleted = true;
+            question.UpdatedDateTime = DateTimeOffset.UtcNow;
+            question.UserNameUpdated = "System";
+
+            await UpdateAsync(question, cancellationToken);
+        }
+    }
 }

@@ -15,4 +15,27 @@ public class ChoiceService : CrudService<Domain.Entities.Choice>, IChoiceService
             .OrderBy(c => c.ChoiceOrder)
             .ToListAsync(cancellationToken);
     }
+    
+    public async Task<List<Domain.Entities.Choice>> GetChoicesByQuestionIdAsync(Guid questionId, CancellationToken cancellationToken = default)
+    {
+        return await GetQueryableSet()
+            .Where(c => c.QuestionId == questionId && c.IsDeleted != true)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task SoftDeleteChoicesAsync(List<Guid> choiceIds, CancellationToken cancellationToken = default)
+    {
+        var choices = await GetQueryableSet()
+            .Where(c => choiceIds.Contains(c.Id))
+            .ToListAsync(cancellationToken);
+
+        foreach (var choice in choices)
+        {
+            choice.IsDeleted = true;
+            choice.UpdatedDateTime = DateTimeOffset.UtcNow;
+            choice.UserNameUpdated = "System";
+        
+            await UpdateAsync(choice, cancellationToken);
+        }
+    }
 }

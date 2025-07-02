@@ -144,18 +144,42 @@ public class PollController : ControllerBase
         }
     }
 
-    // [Authorize(AuthorizationPolicyNames.DeletePollPolicy)]
-    // [HttpDelete("{id}")]
-    // [ProducesResponseType(StatusCodes.Status200OK)]
-    // [ProducesResponseType(StatusCodes.Status404NotFound)]
-    // [MapToApiVersion("1.0")]
-    // public async Task<ActionResult> Delete(Guid id)
-    // {
-    //     var poll = await _dispatcher.DispatchAsync(new GetPollQuery { Id = id });
-    //     await _dispatcher.DispatchAsync(new DeletePollCommand { Poll = poll });
-    //
-    //     return Ok();
-    // }
+    // Delete a poll (soft delete)
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [MapToApiVersion("1.0")]
+    public async Task<ActionResult<ResultModel<bool>>> DeletePoll(Guid id)
+    {
+        try
+        {
+            ValidationException.Requires(id != Guid.Empty, "Invalid Poll Id");
+
+            await _dispatcher.DispatchAsync(new DeletePollCommand(id));
+
+            return Ok(ResultModel<bool>.Create(true, false, "Poll and all related data deleted successfully", 200));
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ResultModel<bool>.Create(false, true, ex.Message, 400));
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden,
+                ResultModel<bool>.Create(false, true, ex.Message, 403));
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ResultModel<bool>.Create(false, true, ex.Message, 404));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                ResultModel<bool>.Create(false, true, $"Error deleting poll: {ex.Message}", 500));
+        }
+    }
     
     // Question APIs
 
