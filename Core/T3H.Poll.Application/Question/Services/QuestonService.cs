@@ -40,4 +40,20 @@ public class QuestionService : CrudService<Domain.Entities.Question>, IQuestionS
             .Where(q => questionIds.Contains(q.Id))
             .ToListAsync(cancellationToken);
     }
+    
+    public async Task<Domain.Entities.Question?> GetQuestionWithPollAsync(Guid questionId, CancellationToken cancellationToken = default)
+    {
+        return await GetQueryableSet()
+            .Include(q => q.Poll)
+            .FirstOrDefaultAsync(q => q.Id == questionId, cancellationToken);
+    }
+
+    public async Task<List<Domain.Entities.Question>> GetRelatedQuestionsAsync(Guid pollId, Guid excludeQuestionId, CancellationToken cancellationToken = default)
+    {
+        return await GetQueryableSet()
+            .Where(q => q.PollId == pollId && q.Id != excludeQuestionId && q.IsActive == true)
+            .OrderBy(q => q.QuestionOrder)
+            .ToListAsync(cancellationToken);
+    }
+
 }

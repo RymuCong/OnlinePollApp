@@ -214,35 +214,69 @@ public class PollController : ControllerBase
                     null, true, $"Error searching questions: {ex.Message}", 500));
         }
     }
+    
+    // Get question detail in a poll
+    [HttpGet("{pollId}/questions/{questionId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [MapToApiVersion("1.0")]
+    public async Task<ActionResult<ResultModel<QuestionDetailDto>>> GetQuestionDetail(
+        Guid pollId,
+        Guid questionId)
+    {
+        try
+        {
+            ValidationException.Requires(pollId != Guid.Empty, "Invalid Poll Id");
+            ValidationException.Requires(questionId != Guid.Empty, "Invalid Question Id");
 
-    // [HttpGet("questions/{questionId}")]
-    // [ProducesResponseType(StatusCodes.Status200OK)]
-    // [ProducesResponseType(StatusCodes.Status404NotFound)]
-    // [MapToApiVersion("1.0")]
-    // public async Task<ActionResult<QuestionDto>> GetQuestionById(Guid questionId)
-    // {
-    //     ValidationException.Requires(questionId != Guid.Empty, "Invalid Question Id");
-    //     
-    //     try
-    //     {
-    //         var question = await _dispatcher.DispatchAsync(new GetQuestionByIdQuery { Id = questionId });
-    //         return Ok(question);
-    //     }
-    //     catch (NotFoundException ex)
-    //     {
-    //         return NotFound(ResultModel<QuestionDto>.Create(null, true, ex.Message, 404));
-    //     }
-    //     catch (ForbiddenException ex)
-    //     {
-    //         return StatusCode(StatusCodes.Status403Forbidden, 
-    //             ResultModel<QuestionDto>.Create(null, true, ex.Message, 403));
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return BadRequest(ResultModel<QuestionDto>.Create(null, true, ex.Message, 400));
-    //     }
-    // }
-    //
+            var query = new GetQuestionDetailQuery(questionId);
+            var result = await _dispatcher.DispatchAsync(query);
+
+            // Verify that the question belongs to the specified poll
+            if (result.Data.PollId != pollId)
+            {
+                return BadRequest(ResultModel<QuestionDetailDto>.Create(
+                    null, true, "Question does not belong to the specified poll", 400));
+            }
+
+            // Check if user has access to this poll's questions
+            if (result.Data.PollCreatorId.HasValue && 
+                result.Data.PollCreatorId.Value != _currentUser.UserId)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden,
+                    ResultModel<QuestionDetailDto>.Create(null, true,
+                    "You can only view questions in polls you created", 403));
+            }
+
+            return Ok(result);
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ResultModel<QuestionDetailDto>.Create(
+                null, true, ex.Message, 400));
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ResultModel<QuestionDetailDto>.Create(
+                null, true, ex.Message, 404));
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden,
+                ResultModel<QuestionDetailDto>.Create(
+                    null, true, ex.Message, 403));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                ResultModel<QuestionDetailDto>.Create(
+                    null, true, $"Error getting question detail: {ex.Message}", 500));
+        }
+    }
+
+
     [HttpPost("{pollId}/questions")]
     [Consumes("application/json")]
     [ProducesResponseType(StatusCodes.Status201Created)]
