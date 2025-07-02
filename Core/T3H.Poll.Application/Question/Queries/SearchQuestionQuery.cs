@@ -1,6 +1,8 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using T3H.Poll.Application.Choice.Services;
 using T3H.Poll.Application.Common.Queries;
+using T3H.Poll.Application.Polls.Services;
 using T3H.Poll.Application.Question.DTOs;
 using T3H.Poll.Domain.Enums;
 
@@ -112,14 +114,17 @@ public class SearchQuestionQuery : BaseSearchQuery<Domain.Entities.Question, Que
 
 public class SearchQuestionQueryHandler : BaseSearchQueryHandler<Domain.Entities.Question, QuestionSearchResponse, SearchQuestionQuery>
 {
-    private readonly ICrudService<Domain.Entities.Poll> _pollService;
+    private readonly IPollService _pollService;
+    private readonly IChoiceService _choiceService;
 
     public SearchQuestionQueryHandler(
         ICrudService<Domain.Entities.Question> crudService,
-        ICrudService<Domain.Entities.Poll> pollService)
+        IPollService pollService,
+        IChoiceService choiceService)
         : base(crudService)
     {
         _pollService = pollService;
+        _choiceService = choiceService;
     }
 
     public override async Task<SearchResponseModel<QuestionSearchResponse>> HandleAsync(
@@ -174,11 +179,31 @@ public class SearchQuestionQueryHandler : BaseSearchQueryHandler<Domain.Entities
             .Take(query.SearchRequest.PageSize)
             .ToListAsync(cancellationToken);
 
-        // Format questions with select expression
+        // Get question IDs for batch loading choices
+        var questionIds = paginatedQuestions.Select(q => q.Id).ToList();
+        var choicesByQuestion = await _choiceService.GetChoicesByQuestionIdsAsync(questionIds, cancellationToken);
+
+        // Format questions with select expression and include choices
         var questionDtos = new List<QuestionSearchResponse>();
         foreach (var question in paginatedQuestions)
         {
             var questionDto = query.GetSelectExpression().Compile()(question);
+            
+            // Add choices for this question
+            if (choicesByQuestion.TryGetValue(question.Id, out var choices))
+            {
+                questionDto.Choices = choices.Select(c => new ChoiceSearchResponse
+                {
+                    Id = c.Id,
+                    QuestionId = c.QuestionId,
+                    ChoiceText = c.ChoiceText,
+                    ChoiceOrder = c.ChoiceOrder,
+                    IsCorrect = c.IsCorrect,
+                    MediaUrl = c.MediaUrl,
+                    IsActive = c.IsActive
+                }).ToList();
+            }
+            
             questionDtos.Add(questionDto);
         }
 

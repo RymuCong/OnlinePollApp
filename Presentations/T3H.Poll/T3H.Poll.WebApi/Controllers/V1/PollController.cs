@@ -130,7 +130,7 @@ public class PollController : ControllerBase
         }
         catch (NotFoundException ex)
         {
-            return NotFound(ResultModel<PollRequest>.Create(null, true, ex.Message, 404));
+            return NotFound(ResultModel<PollRequest>.Create(null, true, ex.Message, 204));
         }
         catch (ForbiddenException ex)
         {
@@ -172,7 +172,7 @@ public class PollController : ControllerBase
         }
         catch (NotFoundException ex)
         {
-            return NotFound(ResultModel<bool>.Create(false, true, ex.Message, 404));
+            return NotFound(ResultModel<bool>.Create(false, true, ex.Message, 204));
         }
         catch (Exception ex)
         {
@@ -284,7 +284,7 @@ public class PollController : ControllerBase
         catch (NotFoundException ex)
         {
             return NotFound(ResultModel<QuestionDetailDto>.Create(
-                null, true, ex.Message, 404));
+                null, true, ex.Message, 204));
         }
         catch (ForbiddenException ex)
         {
@@ -327,7 +327,7 @@ public class PollController : ControllerBase
         }
         catch (NotFoundException ex)
         {
-            return NotFound(ResultModel<Guid>.Create(Guid.Empty, true, ex.Message, 404));
+            return NotFound(ResultModel<Guid>.Create(Guid.Empty, true, ex.Message, 204));
         }
         catch (Exception ex)
         {
@@ -363,7 +363,7 @@ public class PollController : ControllerBase
         }
         catch (NotFoundException ex)
         {
-            return NotFound(ResultModel<bool>.Create(false, true, ex.Message, 404));
+            return NotFound(ResultModel<bool>.Create(false, true, ex.Message, 204));
         }
         catch (Exception ex)
         {
@@ -399,7 +399,7 @@ public class PollController : ControllerBase
         }
         catch (NotFoundException ex)
         {
-            return NotFound(ResultModel<bool>.Create(false, true, ex.Message, 404));
+            return NotFound(ResultModel<bool>.Create(false, true, ex.Message, 204));
         }
         catch (Exception ex)
         {

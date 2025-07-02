@@ -38,4 +38,19 @@ public class ChoiceService : CrudService<Domain.Entities.Choice>, IChoiceService
             await UpdateAsync(choice, cancellationToken);
         }
     }
+    
+    public async Task<Dictionary<Guid, List<Domain.Entities.Choice>>> GetChoicesByQuestionIdsAsync(List<Guid> questionIds, CancellationToken cancellationToken = default)
+    {
+        if (!questionIds.Any())
+            return new Dictionary<Guid, List<Domain.Entities.Choice>>();
+
+        var allChoices = await GetQueryableSet()
+            .Where(c => questionIds.Contains(c.QuestionId) && c.IsDeleted != true)
+            .OrderBy(c => c.ChoiceOrder)
+            .ToListAsync(cancellationToken);
+
+        return allChoices
+            .GroupBy(c => c.QuestionId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+    }
 }
