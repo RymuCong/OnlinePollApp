@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace T3H.Poll.Application.Common.Queries;
 
-public abstract class BaseSearchQuery<TEntity, TResult> : IQuery<ListResultModel<TResult>>
-     where TEntity : Entity<Guid>, IAggregateRoot
+public abstract class BaseSearchQuery<TEntity, TResult> : IQuery<SearchResponseModel<TResult>>
+     where TEntity  : Entity<Guid>, IAggregateRoot
 {
     public SearchRequestModel SearchRequest { get; set; }
 
@@ -14,7 +14,7 @@ public abstract class BaseSearchQuery<TEntity, TResult> : IQuery<ListResultModel
     public abstract IOrderedQueryable<TEntity> ApplySort(IQueryable<TEntity> query, string sortField, bool isDescending);
 }
 
-public abstract class BaseSearchQueryHandler<TEntity, TResult, TQuery> : IQueryHandler<TQuery, ListResultModel<TResult>>
+public abstract class BaseSearchQueryHandler<TEntity, TResult, TQuery> : IQueryHandler<TQuery, SearchResponseModel<TResult>>
     where TEntity : Entity<Guid>, IAggregateRoot
     where TQuery : BaseSearchQuery<TEntity, TResult>
 {
@@ -25,11 +25,14 @@ public abstract class BaseSearchQueryHandler<TEntity, TResult, TQuery> : IQueryH
         _crudService = crudService;
     }
 
-    protected virtual async Task<IQueryable<TEntity>> PrepareBaseQueryAsync(
+    protected virtual Task<IQueryable<TEntity>> PrepareBaseQueryAsync(
         TQuery query,
         CancellationToken cancellationToken)
     {
         var baseQuery = _crudService.GetQueryableSet();
+
+        // Lọc theo IsDelete (chỉ lấy bản ghi chưa bị xóa)
+        baseQuery = baseQuery.Where(e => !EF.Property<bool>(e, "IsDeleted"));
 
         // Add includes
         baseQuery = query.AddIncludes(baseQuery);
@@ -50,10 +53,10 @@ public abstract class BaseSearchQueryHandler<TEntity, TResult, TQuery> : IQueryH
             baseQuery = query.ApplySort(baseQuery, query.SearchRequest.SortField, query.SearchRequest.IsDescending);
         }
 
-        return baseQuery;
+        return Task.FromResult(baseQuery);
     }
 
-    public virtual async Task<ListResultModel<TResult>> HandleAsync(
+    public virtual async Task<SearchResponseModel<TResult>> HandleAsync(
         TQuery request,
         CancellationToken cancellationToken = default)
     {
@@ -70,7 +73,12 @@ public abstract class BaseSearchQueryHandler<TEntity, TResult, TQuery> : IQueryH
             .Take(request.SearchRequest.PageSize)
             .ToListAsync(cancellationToken);
 
-        return ListResultModel<TResult>.Create(items, totalItems, request.SearchRequest.PageNumber, request.SearchRequest.PageSize,
-            (int)Math.Ceiling(totalItems / (double)request.SearchRequest.PageSize));
+        return new SearchResponseModel<TResult>
+        {
+            Items = items,
+            TotalItems = totalItems,
+            TotalPages = (int)Math.Ceiling(totalItems / (double)request.SearchRequest.PageSize),
+            CurrentPage = request.SearchRequest.PageNumber
+        };
     }
 }

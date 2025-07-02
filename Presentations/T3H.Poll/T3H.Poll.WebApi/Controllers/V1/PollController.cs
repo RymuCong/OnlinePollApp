@@ -4,6 +4,7 @@ using T3H.Poll.Application.Polls.DTOs;
 using T3H.Poll.Application.Polls.Queries;
 using T3H.Poll.Application.Question.Commands;
 using T3H.Poll.Application.Question.DTOs;
+using T3H.Poll.Application.Question.Queries;
 using T3H.Poll.Domain.Identity;
 
 namespace T3H.Poll.WebApi.Controllers.V1;
@@ -157,34 +158,63 @@ public class PollController : ControllerBase
     // }
     
     // Question APIs
-    // [HttpGet("{pollId}/questions")]
-    // [ProducesResponseType(StatusCodes.Status200OK)]
-    // [ProducesResponseType(StatusCodes.Status404NotFound)]
-    // [MapToApiVersion("1.0")]
-    // public async Task<ActionResult<List<QuestionDto>>> GetQuestionsByPollId(Guid pollId)
-    // {
-    //     ValidationException.Requires(pollId != Guid.Empty, "Invalid Poll Id");
-    //     
-    //     try
-    //     {
-    //         var questions = await _dispatcher.DispatchAsync(new GetQuestionsByPollIdQuery { PollId = pollId });
-    //         return Ok(questions);
-    //     }
-    //     catch (NotFoundException ex)
-    //     {
-    //         return NotFound(ResultModel<List<QuestionDto>>.Create(null, true, ex.Message, 404));
-    //     }
-    //     catch (ForbiddenException ex)
-    //     {
-    //         return StatusCode(StatusCodes.Status403Forbidden, 
-    //             ResultModel<List<QuestionDto>>.Create(null, true, ex.Message, 403));
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return BadRequest(ResultModel<List<QuestionDto>>.Create(null, true, ex.Message, 400));
-    //     }
-    // }
-    
+
+    // Search questions in a poll
+    [HttpGet("{pollId}/questions/search")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [MapToApiVersion("1.0")]
+    public async Task<ActionResult<SearchResponseModel<QuestionSearchResponse>>> SearchQuestions(
+        Guid pollId,
+        [FromQuery] SearchQuestionQueryParams queryParams)
+    {
+        try
+        {
+            ValidationException.Requires(pollId != Guid.Empty, "Invalid Poll Id");
+
+            // Set pollId from route parameter
+            queryParams.PollId = pollId;
+
+            // Check if user is searching in their own poll or restrict access
+            if (queryParams.CreatorId.HasValue && 
+                queryParams.CreatorId.Value != _currentUser.UserId)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden,
+                    ResultModel<SearchResponseModel<QuestionSearchResponse>>.Create(null, true, 
+                    "You can only search questions in polls you created", 403));
+            }
+
+            var query = new SearchQuestionQuery(queryParams);
+            var result = await _dispatcher.DispatchAsync(query);
+
+            if (!result.Items.Any())
+            {
+                return NotFound(ResultModel<SearchResponseModel<QuestionSearchResponse>>.Create(
+                    result, true, "No questions found matching the search criteria.", 404));
+            }
+
+            return Ok(result);
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ResultModel<SearchResponseModel<QuestionSearchResponse>>.Create(
+                null, true, ex.Message, 400));
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden,
+                ResultModel<SearchResponseModel<QuestionSearchResponse>>.Create(
+                    null, true, ex.Message, 403));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                ResultModel<SearchResponseModel<QuestionSearchResponse>>.Create(
+                    null, true, $"Error searching questions: {ex.Message}", 500));
+        }
+    }
+
     // [HttpGet("questions/{questionId}")]
     // [ProducesResponseType(StatusCodes.Status200OK)]
     // [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -213,7 +243,7 @@ public class PollController : ControllerBase
     //     }
     // }
     //
-    [HttpPost("questions/{pollId}")]
+    [HttpPost("{pollId}/questions")]
     [Consumes("application/json")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -247,7 +277,7 @@ public class PollController : ControllerBase
         }
     }
     
-    [HttpPut("questions/{pollId}")]
+    [HttpPut("{pollId}/questions")]
     [Consumes("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -283,31 +313,40 @@ public class PollController : ControllerBase
         }
     }
     
-    // [HttpDelete("questions/{questionId}")]
-    // [ProducesResponseType(StatusCodes.Status200OK)]
-    // [ProducesResponseType(StatusCodes.Status404NotFound)]
-    // [MapToApiVersion("1.0")]
-    // public async Task<ActionResult<ResultModel<bool>>> DeleteQuestion(Guid questionId)
-    // {
-    //     ValidationException.Requires(questionId != Guid.Empty, "Invalid Question Id");
-    //     
-    //     try
-    //     {
-    //         var result = await _dispatcher.DispatchAsync(new DeleteQuestionCommand { Id = questionId });
-    //         return Ok(ResultModel<bool>.Create(result));
-    //     }
-    //     catch (ForbiddenException ex)
-    //     {
-    //         return StatusCode(StatusCodes.Status403Forbidden, 
-    //             ResultModel<bool>.Create(false, true, ex.Message, 403));
-    //     }
-    //     catch (NotFoundException ex)
-    //     {
-    //         return NotFound(ResultModel<bool>.Create(false, true, ex.Message, 404));
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return BadRequest(ResultModel<bool>.Create(false, true, ex.Message, 400));
-    //     }
-    // }
+    [HttpDelete("{pollId}/questions")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [MapToApiVersion("1.0")]
+    public async Task<ActionResult<ResultModel<bool>>> DeleteQuestions(Guid pollId, [FromBody] List<Guid> questionIds)
+    {
+        try
+        {
+            ValidationException.Requires(pollId != Guid.Empty, "Invalid Poll Id");
+            ValidationException.Requires(questionIds != null && questionIds.Any(), "At least one question ID must be provided");
+
+            await _dispatcher.DispatchAsync(new DeleteQuestionCommand(pollId, questionIds));
+
+            return Ok(ResultModel<bool>.Create(true, false, $"{questionIds.Count} question(s) deleted successfully", 200));
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ResultModel<bool>.Create(false, true, ex.Message, 400));
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden,
+                ResultModel<bool>.Create(false, true, ex.Message, 403));
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ResultModel<bool>.Create(false, true, ex.Message, 404));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                ResultModel<bool>.Create(false, true, $"Error deleting questions: {ex.Message}", 500));
+        }
+    }
 }

@@ -7,21 +7,68 @@ namespace T3H.Poll.Application.Polls.Queries;
 
 public class SearchPollsQuery : BaseSearchQuery<Domain.Entities.Poll, PollSearchResponse>
 {
+    public Guid? CreatorId { get; private set; }
+
     public SearchPollsQuery(SearchPollsQueryParams searchParams)
     {
         SearchRequest = searchParams.ToSearchRequestModel();
+        CreatorId = searchParams.CreatorId;
     }
 
     public override Expression<Func<Domain.Entities.Poll, bool>> GetFilterExpression(SearchCondition condition)
     {
         return condition switch
         {
-            {Field: "FieldSearch", Operator: "contains"}  =>
-                p => p.Title.Contains((string)condition.Value) || p.Description.Contains((string)condition.Value),
+            // Field search (Title or Description)
+            { Field: "FieldSearch", Operator: "contains", Value: var value } when value != null =>
+                p => p.Title.Contains((string)value) || p.Description.Contains((string)value),
 
-            {Field: "CreatorId", Operator: "eq"} =>
-                p => p.CreatorId == Guid.Parse((string)condition.Value),
+            // Title search
+            { Field: "Title", Operator: "contains", Value: var value } when value != null =>
+                p => p.Title.Contains((string)value),
 
+            // Description search
+            { Field: "Description", Operator: "contains", Value: var value } when value != null =>
+                p => p.Description.Contains((string)value),
+
+            // Creator ID filter
+            { Field: "CreatorId", Operator: "eq", Value: var value } when value != null && Guid.TryParse((string)value, out var creatorId) =>
+                p => p.CreatorId == creatorId,
+
+            // IsActive filter
+            { Field: "IsActive", Operator: "eq", Value: var value } when value != null && bool.TryParse((string)value, out var isActive) =>
+                p => p.IsActive == isActive,
+
+            // IsPublic filter
+            { Field: "IsPublic", Operator: "eq", Value: var value } when value != null && bool.TryParse((string)value, out var isPublic) =>
+                p => p.IsPublic == isPublic,
+
+            // IsAnonymous filter
+            { Field: "IsAnonymous", Operator: "eq", Value: var value } when value != null && bool.TryParse((string)value, out var isAnonymous) =>
+                p => p.IsAnonymous == isAnonymous,
+
+            // Created date range filters
+            { Field: "CreatedDateTime", Operator: "ge", Value: var value } when value != null && DateTime.TryParse((string)value, out var fromDate) =>
+                p => p.CreatedDateTime.Date >= fromDate.Date,
+
+            { Field: "CreatedDateTime", Operator: "le", Value: var value } when value != null && DateTime.TryParse((string)value, out var toDate) =>
+                p => p.CreatedDateTime.Date <= toDate.Date,
+
+            // StartTime range filters
+            { Field: "StartTime", Operator: "ge", Value: var value } when value != null && DateTime.TryParse((string)value, out var fromStart) =>
+                p => p.StartTime >= fromStart,
+
+            { Field: "StartTime", Operator: "le", Value: var value } when value != null && DateTime.TryParse((string)value, out var toStart) =>
+                p => p.StartTime <= toStart,
+
+            // EndTime range filters
+            { Field: "EndTime", Operator: "ge", Value: var value } when value != null && DateTime.TryParse((string)value, out var fromEnd) =>
+                p => p.EndTime.HasValue && p.EndTime.Value >= fromEnd,
+
+            { Field: "EndTime", Operator: "le", Value: var value } when value != null && DateTime.TryParse((string)value, out var toEnd) =>
+                p => p.EndTime.HasValue && p.EndTime.Value <= toEnd,
+
+            // Default case
             _ => null
         };
     }
@@ -41,7 +88,7 @@ public class SearchPollsQuery : BaseSearchQuery<Domain.Entities.Poll, PollSearch
             IsMultipleVotesAllowed = poll.IsMultipleVotesAllowed,
             IsViewableByModerator = poll.IsViewableByModerator,
             StartTime = poll.StartTime,
-            EndTime = poll.EndTime ?? DateTime.MinValue,
+            EndTime = poll.EndTime ?? DateTime.MinValue
         };
     }
 
@@ -61,6 +108,10 @@ public class SearchPollsQuery : BaseSearchQuery<Domain.Entities.Poll, PollSearch
             ("title", false) => query.OrderBy(p => p.Title),
             ("createddatetime", true) => query.OrderByDescending(p => p.CreatedDateTime),
             ("createddatetime", false) => query.OrderBy(p => p.CreatedDateTime),
+            ("updateddatetime", true) => query.OrderByDescending(p => p.UpdatedDateTime),
+            ("updateddatetime", false) => query.OrderBy(p => p.UpdatedDateTime),
+            ("starttime", true) => query.OrderByDescending(p => p.StartTime),
+            ("starttime", false) => query.OrderBy(p => p.StartTime),
             _ => query.OrderByDescending(p => p.CreatedDateTime)
         };
     }
@@ -68,64 +119,53 @@ public class SearchPollsQuery : BaseSearchQuery<Domain.Entities.Poll, PollSearch
 
 public class SearchPollsQueryHandler : BaseSearchQueryHandler<Domain.Entities.Poll, PollSearchResponse, SearchPollsQuery>
 {
-    private readonly IRepository<Domain.Entities.Poll, Guid> _pollRepository;
-    private readonly IMapper _mapper;
-
-    public SearchPollsQueryHandler(
-        ICrudService<Domain.Entities.Poll> crudService,
-        IRepository<Domain.Entities.Poll, Guid> pollRepository,
-        IMapper mapper)
+    public SearchPollsQueryHandler(ICrudService<Domain.Entities.Poll> crudService)
         : base(crudService)
     {
-        _pollRepository = pollRepository;
-        _mapper = mapper;
     }
 
-    public override async Task<ListResultModel<PollSearchResponse>> HandleAsync(
+    public override async Task<SearchResponseModel<PollSearchResponse>> HandleAsync(
         SearchPollsQuery query,
         CancellationToken cancellationToken = default)
     {
-        var baseQuery = _crudService.GetQueryableSet();
+        // Get base query for polls with all filters applied
+        var baseQuery = await PrepareBaseQueryAsync(query, cancellationToken);
 
-        // Apply filters from search conditions
-        var conditions = query.SearchRequest?.Conditions;
-        if (conditions != null)
+        if (baseQuery == null)
         {
-            foreach (var condition in conditions)
+            return new SearchResponseModel<PollSearchResponse>
             {
-                var predicate = query.GetFilterExpression(condition);
-                if (predicate != null)
-                {
-                    baseQuery = baseQuery.Where(predicate);
-                }
-            }
+                Items = new List<PollSearchResponse>(),
+                TotalItems = 0,
+                TotalPages = 0,
+                CurrentPage = query.SearchRequest?.PageNumber ?? 1
+            };
         }
 
-        // Apply sorting
-        var sortedQuery = query.ApplySort(baseQuery, query.SearchRequest?.SortField ?? "updateddatetime",
-            query.SearchRequest?.IsDescending ?? true);
+        // Get total count for pagination metadata
+        var totalItems = await baseQuery.CountAsync(cancellationToken);
 
-        // Get total count
-        var totalItems = await sortedQuery.CountAsync(cancellationToken);
-
-        // Apply paging
-        int page = query.SearchRequest?.PageNumber ?? 1;
-        int pageSize = query.SearchRequest?.PageSize ?? 10;
-
-        // Use the select expression defined in the query instead of ProjectTo
-        var selectExpression = query.GetSelectExpression();
-        var items = await sortedQuery
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(selectExpression)
+        // Apply pagination
+        var paginatedPolls = await baseQuery
+            .Skip((query.SearchRequest.PageNumber - 1) * query.SearchRequest.PageSize)
+            .Take(query.SearchRequest.PageSize)
             .ToListAsync(cancellationToken);
 
-        return ListResultModel<PollSearchResponse>.Create(
-            items,
-            totalItems,
-            page,
-            pageSize,
-            (int)Math.Ceiling(totalItems / (double)pageSize)
-        );
+        // Format polls with select expression
+        var pollDtos = new List<PollSearchResponse>();
+        foreach (var poll in paginatedPolls)
+        {
+            var pollDto = query.GetSelectExpression().Compile()(poll);
+            pollDtos.Add(pollDto);
+        }
+
+        // Return properly formatted response
+        return new SearchResponseModel<PollSearchResponse>
+        {
+            Items = pollDtos,
+            TotalItems = totalItems,
+            TotalPages = (int)Math.Ceiling(totalItems / (double)query.SearchRequest.PageSize),
+            CurrentPage = query.SearchRequest.PageNumber
+        };
     }
 }

@@ -1,6 +1,10 @@
 ﻿using T3H.Poll.Application.Common.Commands;
 using Application.Common.Exceptions;
+using Microsoft.EntityFrameworkCore;
+using T3H.Poll.Application.Choice.Services;
+using T3H.Poll.Application.Polls.Services;
 using T3H.Poll.Application.Question.DTOs;
+using T3H.Poll.Application.Question.Services;
 using T3H.Poll.Domain.Identity;
 using T3H.Poll.Infrastructure.Caching;
 
@@ -74,27 +78,24 @@ public class UpdateQuestionValidator
 
 internal class UpdateQuestionCommandHandler : ICommandHandler<UpdateQuestionCommand>
 {
-    private readonly ICrudService<Domain.Entities.Question> _questionService;
-    private readonly ICrudService<Domain.Entities.Choice> _choiceService;
-    private readonly ICrudService<Domain.Entities.Poll> _pollService;
+    private readonly IQuestionService _questionService;
+    private readonly IChoiceService _choiceService;
+    private readonly IPollService _pollService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUser _currentUser;
-    private readonly RedisCacheService _cacheService;
 
     public UpdateQuestionCommandHandler(
         IUnitOfWork unitOfWork,
-        ICrudService<Domain.Entities.Question> questionService,
-        ICrudService<Domain.Entities.Choice> choiceService,
-        ICrudService<Domain.Entities.Poll> pollService,
-        ICurrentUser currentUser,
-        RedisCacheService cacheService)
+        IQuestionService questionService,
+        IChoiceService choiceService,
+        IPollService pollService,
+        ICurrentUser currentUser)
     {
         _unitOfWork = unitOfWork;
         _questionService = questionService;
         _choiceService = choiceService;
         _pollService = pollService;
         _currentUser = currentUser;
-        _cacheService = cacheService;
     }
 
     public async Task HandleAsync(UpdateQuestionCommand command, CancellationToken cancellationToken = default)
@@ -105,13 +106,42 @@ internal class UpdateQuestionCommandHandler : ICommandHandler<UpdateQuestionComm
         var poll = await _pollService.GetByIdAsync(command.PollId, cancellationToken);
         if (poll == null)
         {
-            throw new NotFoundException($"Poll with ID {command.PollId} not found");
+            throw new NotFoundException($"Poll với ID {command.PollId} không tìm thấy");
         }
 
-        // Only creator of the poll can update questions
         if (poll.CreatorId != _currentUser.UserId)
         {
             throw new ForbiddenException("Bạn chỉ có thể cập nhật câu hỏi cho poll mà bạn đã tạo");
+        }
+
+        // Validate existing questions belong to the poll
+        var existingQuestionIds = command.QuestionRequests
+            .Where(q => q.Id.HasValue)
+            .Select(q => q.Id.Value)
+            .ToList();
+
+        if (existingQuestionIds.Any())
+        {
+            var existingQuestions = await _questionService.GetQuestionsByIdsAsync(existingQuestionIds, cancellationToken);
+
+            // Check if all existing questions belong to the specified poll
+            var questionsNotInPoll = existingQuestions
+                .Where(q => q.PollId != command.PollId)
+                .Select(q => q.Id)
+                .ToList();
+
+            if (questionsNotInPoll.Any())
+            {
+                throw new ValidationException($"Các câu hỏi với ID [{string.Join(", ", questionsNotInPoll)}] không thuộc về poll {command.PollId}");
+            }
+
+            // Check if some question IDs don't exist
+            var foundQuestionIds = existingQuestions.Select(q => q.Id).ToList();
+            var notFoundIds = existingQuestionIds.Except(foundQuestionIds).ToList();
+            if (notFoundIds.Any())
+            {
+                throw new NotFoundException($"Không tìm thấy câu hỏi với ID [{string.Join(", ", notFoundIds)}]");
+            }
         }
 
         using (await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken))
@@ -121,18 +151,14 @@ internal class UpdateQuestionCommandHandler : ICommandHandler<UpdateQuestionComm
                 // Parse string to enum
                 if (!Enum.TryParse<QuestionType>(questionRequest.QuestionType, true, out QuestionType questionType))
                 {
-                    throw new ValidationException($"Invalid question type: {questionRequest.QuestionType}");
+                    throw new ValidationException($"Loại câu hỏi không hợp lệ: {questionRequest.QuestionType}");
                 }
 
                 if (questionRequest.Id.HasValue)
                 {
-                    // Update existing question
+                    // Update existing question (already validated above)
                     var existingQuestion = await _questionService.GetByIdAsync(questionRequest.Id.Value, cancellationToken);
-                    if (existingQuestion == null)
-                    {
-                        throw new NotFoundException($"Question with ID {questionRequest.Id.Value} not found");
-                    }
-
+                    
                     existingQuestion.UpdateQuestion(
                         questionRequest.QuestionText,
                         questionType,
@@ -148,13 +174,13 @@ internal class UpdateQuestionCommandHandler : ICommandHandler<UpdateQuestionComm
                     }
 
                     await _questionService.UpdateAsync(existingQuestion, cancellationToken);
-                    
+
                     // Update choices for existing question
                     await UpdateQuestionChoices(existingQuestion.Id, questionRequest.Choices, cancellationToken);
                 }
                 else
                 {
-                    // Create new question
+                    // Create new question (always belongs to the specified poll)
                     var question = new Domain.Entities.Question(
                         command.PollId,
                         questionRequest.QuestionText,
@@ -187,10 +213,6 @@ internal class UpdateQuestionCommandHandler : ICommandHandler<UpdateQuestionComm
             }
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
-
-            // Clear cache
-            var redisKey = $"GetQuestionsByPollId:{command.PollId}";
-            await _cacheService.RemoveAsync(redisKey);
         }
     }
 
@@ -199,11 +221,35 @@ internal class UpdateQuestionCommandHandler : ICommandHandler<UpdateQuestionComm
         if (choiceRequests == null || !choiceRequests.Any())
             return;
 
+        // Similar validation needed for choices belonging to the question
+        var existingChoiceIds = choiceRequests
+            .Where(c => c.Id.HasValue)
+            .Select(c => c.Id.Value)
+            .ToList();
+
+        if (existingChoiceIds.Any())
+        {
+            var existingChoices = await _choiceService.GetQueryableSet()
+                .Where(c => existingChoiceIds.Contains(c.Id))
+                .ToListAsync(cancellationToken);
+
+            // Check if all existing choices belong to the specified question
+            var choicesNotInQuestion = existingChoices
+                .Where(c => c.QuestionId != questionId)
+                .Select(c => c.Id)
+                .ToList();
+
+            if (choicesNotInQuestion.Any())
+            {
+                throw new ValidationException($"Các lựa chọn với ID [{string.Join(", ", choicesNotInQuestion)}] không thuộc về câu hỏi {questionId}");
+            }
+        }
+
         foreach (var choiceModel in choiceRequests)
         {
             if (choiceModel.Id.HasValue)
             {
-                // Update existing choice
+                // Update existing choice (already validated above)
                 var existingChoice = await _choiceService.GetByIdAsync(choiceModel.Id.Value, cancellationToken);
                 if (existingChoice != null)
                 {
@@ -224,7 +270,7 @@ internal class UpdateQuestionCommandHandler : ICommandHandler<UpdateQuestionComm
             }
             else
             {
-                // Create new choice
+                // Create new choice (always belongs to the specified question)
                 var newChoice = new Domain.Entities.Choice(
                     questionId,
                     choiceModel.ChoiceText,

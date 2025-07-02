@@ -4,6 +4,7 @@ public class Question : Entity<Guid>, IAggregateRoot
 {
     [Required]
     public Guid PollId { get; set; }
+    public Poll Poll { get; set; }
 
     [Required]
     public string QuestionText { get; set; }
