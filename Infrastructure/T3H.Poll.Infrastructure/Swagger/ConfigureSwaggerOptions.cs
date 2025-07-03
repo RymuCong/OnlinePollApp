@@ -18,10 +18,10 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
     {
         var info = new OpenApiInfo()
         {
-            Title = "Digital Insurance APIs",
+            Title = "Online Poll App APIs",
             Version = description.ApiVersion.ToString(),
             Description = "An application with Swagger, Swashbuckle, and API versioning.",
-            Contact = new OpenApiContact() { Name = "Sỹ Nguyễn", Email = "vansy9x@gmail.com" },
+            Contact = new OpenApiContact() { Name = "Thành Công", Email = "phamthanhcong0709@gmail.com" },
             License = new OpenApiLicense() { Name = "MIT", Url = new Uri("https://opensource.org/licenses/MIT") }
         };
 

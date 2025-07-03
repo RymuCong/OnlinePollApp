@@ -64,15 +64,15 @@ public static class Extentions
         {
             options.SwaggerDoc("v1.0", new OpenApiInfo()
             {
-                Title = "Digital Platform version 1.0",
+                Title = "Online Poll App version 1.0",
                 Version = "v1.0",
-                Description = "Digital Platform Api version 1.0",
+                Description = "Online Poll App Api version 1.0",
             });
             options.SwaggerDoc("v2.0", new OpenApiInfo()
             {
-                Title = "Digital Insurance Configuration version 2.0",
+                Title = "Online Poll App version 2.0",
                 Version = "v2.0",
-                Description = "Digital Platform Api version 2",
+                Description = "Online Poll App Api version 2",
             });
 
             /// options.OperationFilter<AddAcceptHeaderParameter>();
@@ -135,7 +135,7 @@ public static class Extentions
         {
             //options.RoutePrefix = "";
             options.DefaultModelsExpandDepth(-1);
-            options.DocumentTitle = "Digital Insurance Configuration Api";
+            options.DocumentTitle = "Online Poll App Configuration Api";
             options.SwaggerEndpoint($"/swagger/v1.0/swagger.json", $"v1");
             options.SwaggerEndpoint($"/swagger/v2.0/swagger.json", $"v2");
         });
