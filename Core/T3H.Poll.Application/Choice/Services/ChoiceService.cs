@@ -4,8 +4,11 @@ namespace T3H.Poll.Application.Choice.Services;
 
 public class ChoiceService : CrudService<Domain.Entities.Choice>, IChoiceService
 {
-    public ChoiceService(IRepository<Domain.Entities.Choice, Guid> repository, Dispatcher dispatcher) : base(repository, dispatcher)
+    private readonly IRepository<Domain.Entities.Choice, Guid> _choiceRepository;
+    
+    public ChoiceService(IRepository<Domain.Entities.Choice, Guid> repository, IRepository<Domain.Entities.Choice, Guid> choiceRepository ,Dispatcher dispatcher) : base(repository, dispatcher)
     {
+        _choiceRepository = choiceRepository;
     }
     
     public async Task<List<Domain.Entities.Choice>> GetActiveChoicesByQuestionIdAsync(Guid questionId, CancellationToken cancellationToken = default)
@@ -33,10 +36,24 @@ public class ChoiceService : CrudService<Domain.Entities.Choice>, IChoiceService
         {
             choice.IsDeleted = true;
             choice.UpdatedDateTime = DateTimeOffset.UtcNow;
-            choice.UserNameUpdated = "System";
         
             await UpdateAsync(choice, cancellationToken);
         }
+    }
+
+    public async Task HardDeleteChoicesAsync(List<Guid> choiceIds, CancellationToken cancellationToken = default)
+    {
+        var choices = await GetQueryableSet()
+            .Where(c => choiceIds.Contains(c.Id))
+            .ToListAsync(cancellationToken);
+
+        foreach (var choice in choices)
+        {
+            _choiceRepository.Delete(choice);
+        }
+        
+        // Save changes to actually execute the deletions
+        await _choiceRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
     }
     
     public async Task<Dictionary<Guid, List<Domain.Entities.Choice>>> GetChoicesByQuestionIdsAsync(List<Guid> questionIds, CancellationToken cancellationToken = default)

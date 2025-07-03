@@ -57,7 +57,7 @@ public class PollController : ControllerBase
     // [Authorize(AuthorizationPolicyNames.AddPollPolicy)]
     [HttpPost]
     [Consumes("application/json")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [MapToApiVersion("1.0")]
     public async Task<ActionResult<ResultModel<PollRequest>>> Post([FromBody] PollRequest request)
@@ -303,7 +303,7 @@ public class PollController : ControllerBase
 
     [HttpPost("{pollId}/questions")]
     [Consumes("application/json")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [MapToApiVersion("1.0")]
     public async Task<ActionResult<ResultModel<Guid>>> CreateQuestions(Guid pollId, [FromBody] ICollection<QuestionRequest> requests)
@@ -314,7 +314,7 @@ public class PollController : ControllerBase
         try
         {
             await _dispatcher.DispatchAsync(new CreateQuestionCommand(pollId, requests));
-            return Ok(ResultModel<Guid>.Create(pollId, false, $"{requests.Count} question(s) created successfully", 201));
+            return Ok(ResultModel<Guid>.Create(Guid.NewGuid(), false, "Questions created successfully"));
         }
         catch (ValidationException ex)
         {
@@ -341,15 +341,28 @@ public class PollController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [MapToApiVersion("1.0")]
-    public async Task<ActionResult<ResultModel<bool>>> UpdateQuestions(Guid pollId, [FromBody] ICollection<QuestionUpdateRequest> requests)
+    public async Task<ActionResult<ResultModel<bool>>> UpdateQuestions(Guid pollId, [FromBody] ICollection<UpdateQuestionDto> requests)
     {
         try
         {
             ValidationException.Requires(pollId != Guid.Empty, "Invalid Poll Id");
-            ValidationException.Requires(requests.Any(), "At least one question must be provided");
+            ValidationException.Requires(requests != null && requests.Any(), "At least one question must be provided");
 
-            await _dispatcher.DispatchAsync(new UpdateQuestionCommand(pollId, requests));
-        
+            // Validate that all requests have valid IDs (not empty Guid)
+            var requestsWithoutId = requests.Where(r => r.Id == Guid.Empty).ToList();
+            if (requestsWithoutId.Any())
+            {
+                return BadRequest(ResultModel<bool>.Create(false, true,
+                    "All questions must have a valid ID for update operation. Use POST to create new questions.", 400));
+            }
+            
+            var questionUpdates = requests.ToDictionary(
+                request => request.Id, 
+                request => request
+            );
+
+            await _dispatcher.DispatchAsync(new UpdateQuestionCommand(pollId, questionUpdates));
+
             return Ok(ResultModel<bool>.Create(true, false, "Questions updated successfully"));
         }
         catch (ValidationException ex)
@@ -358,7 +371,7 @@ public class PollController : ControllerBase
         }
         catch (ForbiddenException ex)
         {
-            return StatusCode(StatusCodes.Status403Forbidden, 
+            return StatusCode(StatusCodes.Status403Forbidden,
                 ResultModel<bool>.Create(false, true, ex.Message, 403));
         }
         catch (NotFoundException ex)

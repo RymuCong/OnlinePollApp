@@ -70,7 +70,7 @@ internal class DeleteQuestionCommandHandler : ICommandHandler<DeleteQuestionComm
 
         // Get questions with choices, filtering by both question IDs and poll ID
         var questions = await _questionService.GetQuestionsWithChoicesByIdsAsync(command.QuestionIds, cancellationToken);
-        
+
         // Filter questions that actually belong to the specified poll
         var questionsInPoll = questions.Where(q => q.PollId == command.PollId).ToList();
 
@@ -89,7 +89,8 @@ internal class DeleteQuestionCommandHandler : ICommandHandler<DeleteQuestionComm
 
         using (await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken))
         {
-            await _questionService.SoftDeleteQuestionsAndChoicesAsync(questionsInPoll, cancellationToken);
+            // Use hard delete for individual question deletion
+            await _questionService.HardDeleteQuestionsAndChoicesAsync(questionsInPoll, cancellationToken);
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
         }
     }

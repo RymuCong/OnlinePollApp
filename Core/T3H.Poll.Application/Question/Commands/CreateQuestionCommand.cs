@@ -25,7 +25,7 @@ public class CreateQuestionValidator
     
     private static readonly QuestionType[] TypesRequiringChoices = { 
         QuestionType.SingleChoice, 
-        QuestionType.MultiChoice, 
+        QuestionType.MultipleChoice, 
         QuestionType.Ranking, 
         QuestionType.Rating,
         QuestionType.YesNo,

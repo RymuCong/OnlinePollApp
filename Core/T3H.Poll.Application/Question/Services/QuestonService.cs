@@ -4,8 +4,16 @@ namespace T3H.Poll.Application.Question.Services;
 
 public class QuestionService : CrudService<Domain.Entities.Question>, IQuestionService
 {
-    public QuestionService(IRepository<Domain.Entities.Question, Guid> repository, Dispatcher dispatcher) : base(repository, dispatcher)
+    private readonly IRepository<Domain.Entities.Choice, Guid> _choiceRepository;
+    private readonly IRepository<Domain.Entities.Question, Guid> _questionRepository;
+
+    public QuestionService(
+        IRepository<Domain.Entities.Question, Guid> repository, 
+        IRepository<Domain.Entities.Choice, Guid> choiceRepository,
+        Dispatcher dispatcher) : base(repository, dispatcher)
     {
+        _choiceRepository = choiceRepository;
+        _questionRepository = repository;
     }
 
     public async Task<List<Domain.Entities.Question>> GetQuestionsWithChoicesByIdsAsync(List<Guid> questionIds, CancellationToken cancellationToken = default)
@@ -33,14 +41,32 @@ public class QuestionService : CrudService<Domain.Entities.Question>, IQuestionS
             await UpdateAsync(question, cancellationToken);
         }
     }
+
+    public async Task HardDeleteQuestionsAndChoicesAsync(List<Domain.Entities.Question> questions, CancellationToken cancellationToken = default)
+    {
+        foreach (var question in questions)
+        {
+            // Mark choices for deletion
+            foreach (var choice in question.Choices)
+            {
+                _choiceRepository.Delete(choice);
+            }
+
+            // Mark question for deletion
+            _questionRepository.Delete(question);
+        }
     
+        // Save changes to actually execute the deletions
+        await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<List<Domain.Entities.Question>> GetQuestionsByIdsAsync(List<Guid> questionIds, CancellationToken cancellationToken = default)
     {
         return await GetQueryableSet()
             .Where(q => questionIds.Contains(q.Id))
             .ToListAsync(cancellationToken);
     }
-    
+
     public async Task<Domain.Entities.Question?> GetQuestionWithPollAsync(Guid questionId, CancellationToken cancellationToken = default)
     {
         return await GetQueryableSet()
@@ -73,7 +99,6 @@ public class QuestionService : CrudService<Domain.Entities.Question>, IQuestionS
         {
             question.IsDeleted = true;
             question.UpdatedDateTime = DateTimeOffset.UtcNow;
-            question.UserNameUpdated = "System";
 
             await UpdateAsync(question, cancellationToken);
         }

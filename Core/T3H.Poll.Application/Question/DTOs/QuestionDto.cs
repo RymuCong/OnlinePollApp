@@ -19,3 +19,26 @@ public class QuestionDto
     public DateTimeOffset? UpdatedDateTime { get; set; }
     public string UserNameUpdated { get; set; }
 }
+
+public class UpdateQuestionDto
+{
+    public Guid Id { get; set; }
+    public string? QuestionText { get; set; }
+    public string? QuestionType { get; set; }
+    public bool? IsRequired { get; set; }
+    public int? QuestionOrder { get; set; }
+    public string? MediaUrl { get; set; }
+    public string? Settings { get; set; }
+    public bool? IsActive { get; set; }
+    public ICollection<UpdateChoiceDto>? Choices { get; set; }
+}
+
+public class UpdateChoiceDto
+{
+    public Guid? Id { get; set; } // Null for new choices, existing ID for updates
+    public string? ChoiceText { get; set; }
+    public int? ChoiceOrder { get; set; }
+    public bool? IsCorrect { get; set; }
+    public string? MediaUrl { get; set; }
+    public bool? IsActive { get; set; }
+}

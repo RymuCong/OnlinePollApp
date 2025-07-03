@@ -18,11 +18,10 @@ public class PollService : CrudService<Domain.Entities.Poll>, IPollService
     public async Task SoftDeleteAsync(Guid pollId, CancellationToken cancellationToken = default)
     {
         var poll = await GetByIdAsync(pollId, cancellationToken);
-        if (poll != null)
+        if (poll != null && !poll.IsDeleted)
         {
             poll.IsDeleted = true;
             poll.UpdatedDateTime = DateTimeOffset.UtcNow;
-            poll.UserNameUpdated = "System";
             await UpdateAsync(poll, cancellationToken);
         }
     }

@@ -13,63 +13,49 @@ namespace T3H.Poll.Application.Question.Commands;
 public class UpdateQuestionCommand : ICommand
 {
     public Guid PollId { get; set; }
-    public ICollection<QuestionUpdateRequest> QuestionRequests { get; set; }
+    public Dictionary<Guid, UpdateQuestionDto> QuestionUpdates { get; set; }
 
-    public UpdateQuestionCommand(Guid pollId, ICollection<QuestionUpdateRequest> questionRequests)
+    public UpdateQuestionCommand(Guid pollId, Dictionary<Guid, UpdateQuestionDto> questionUpdates)
     {
         PollId = pollId;
-        QuestionRequests = questionRequests ?? throw new ArgumentNullException(nameof(questionRequests), "Question requests collection cannot be null");
+        QuestionUpdates = questionUpdates ?? throw new ArgumentNullException(nameof(questionUpdates));
 
-        if (!questionRequests.Any())
-            throw new ArgumentException("At least one question must be provided", nameof(questionRequests));
+        if (!questionUpdates.Any())
+            throw new ArgumentException("At least one question update must be provided", nameof(questionUpdates));
     }
-}
-
-public class QuestionUpdateRequest : QuestionRequest
-{
-    public Guid? Id { get; set; } // Null for new questions, existing ID for updates
-    public bool? IsActive { get; set; } // To handle soft delete
 }
 
 public class UpdateQuestionValidator
 {
     private static readonly string[] ValidQuestionTypes = Enum.GetNames(typeof(QuestionType));
 
-    private static readonly QuestionType[] TypesRequiringChoices = {
-        QuestionType.SingleChoice,
-        QuestionType.MultiChoice,
-        QuestionType.Ranking,
-        QuestionType.Rating,
-        QuestionType.YesNo,
-        QuestionType.LongText,
-        QuestionType.ShortText
-    };
-
     public static void Validate(UpdateQuestionCommand command)
     {
         ValidationException.Requires(command.PollId != Guid.Empty, "Poll ID không được để trống.");
-        ValidationException.Requires(command.QuestionRequests != null && command.QuestionRequests.Any(), "Phải có ít nhất một câu hỏi.");
+        ValidationException.Requires(command.QuestionUpdates != null && command.QuestionUpdates.Any(), "Phải có ít nhất một câu hỏi cần cập nhật.");
 
-        foreach (var questionRequest in command.QuestionRequests)
+        foreach (var (questionId, updateDto) in command.QuestionUpdates)
         {
-            ValidationException.NotNullOrWhiteSpace(questionRequest.QuestionText, "Nội dung câu hỏi không được để trống.");
-            ValidationException.NotNullOrWhiteSpace(questionRequest.QuestionType, "Loại câu hỏi không được để trống.");
-
-            if (!Enum.TryParse<QuestionType>(questionRequest.QuestionType, true, out QuestionType questionType))
+            ValidationException.Requires(questionId != Guid.Empty, "Question ID không được để trống.");
+            
+            // Only validate if QuestionType is provided
+            if (!string.IsNullOrWhiteSpace(updateDto.QuestionType))
             {
-                throw new ValidationException($"Loại câu hỏi không hợp lệ. Loại câu hỏi phải là một trong: {string.Join(", ", ValidQuestionTypes)}");
+                if (!Enum.TryParse<QuestionType>(updateDto.QuestionType, true, out _))
+                {
+                    throw new ValidationException($"Loại câu hỏi không hợp lệ. Loại câu hỏi phải là một trong: {string.Join(", ", ValidQuestionTypes)}");
+                }
             }
 
-            if (TypesRequiringChoices.Contains(questionType))
+            // Only validate choices if they are provided
+            if (updateDto.Choices != null)
             {
-                if (questionRequest.Choices == null || !questionRequest.Choices.Any())
+                foreach (var choice in updateDto.Choices)
                 {
-                    throw new ValidationException($"Câu hỏi loại {questionType} phải có ít nhất một lựa chọn.");
-                }
-
-                foreach (var choice in questionRequest.Choices)
-                {
-                    ValidationException.NotNullOrWhiteSpace(choice.ChoiceText, "Nội dung lựa chọn không được để trống.");
+                    if (!string.IsNullOrWhiteSpace(choice.ChoiceText) && string.IsNullOrWhiteSpace(choice.ChoiceText.Trim()))
+                    {
+                        throw new ValidationException("Nội dung lựa chọn không được để trống.");
+                    }
                 }
             }
         }
@@ -114,101 +100,79 @@ internal class UpdateQuestionCommandHandler : ICommandHandler<UpdateQuestionComm
             throw new ForbiddenException("Bạn chỉ có thể cập nhật câu hỏi cho poll mà bạn đã tạo");
         }
 
-        // Validate existing questions belong to the poll
-        var existingQuestionIds = command.QuestionRequests
-            .Where(q => q.Id.HasValue)
-            .Select(q => q.Id.Value)
+        var questionIds = command.QuestionUpdates.Keys.ToList();
+        var existingQuestions = await _questionService.GetQuestionsByIdsAsync(questionIds, cancellationToken);
+
+        // Check if all questions belong to the specified poll
+        var questionsNotInPoll = existingQuestions
+            .Where(q => q.PollId != command.PollId)
+            .Select(q => q.Id)
             .ToList();
 
-        if (existingQuestionIds.Any())
+        if (questionsNotInPoll.Any())
         {
-            var existingQuestions = await _questionService.GetQuestionsByIdsAsync(existingQuestionIds, cancellationToken);
+            throw new ValidationException($"Các câu hỏi với ID [{string.Join(", ", questionsNotInPoll)}] không thuộc về poll {command.PollId}");
+        }
 
-            // Check if all existing questions belong to the specified poll
-            var questionsNotInPoll = existingQuestions
-                .Where(q => q.PollId != command.PollId)
-                .Select(q => q.Id)
-                .ToList();
-
-            if (questionsNotInPoll.Any())
-            {
-                throw new ValidationException($"Các câu hỏi với ID [{string.Join(", ", questionsNotInPoll)}] không thuộc về poll {command.PollId}");
-            }
-
-            // Check if some question IDs don't exist
-            var foundQuestionIds = existingQuestions.Select(q => q.Id).ToList();
-            var notFoundIds = existingQuestionIds.Except(foundQuestionIds).ToList();
-            if (notFoundIds.Any())
-            {
-                throw new NotFoundException($"Không tìm thấy câu hỏi với ID [{string.Join(", ", notFoundIds)}]");
-            }
+        // Check if some question IDs don't exist
+        var foundQuestionIds = existingQuestions.Select(q => q.Id).ToList();
+        var notFoundIds = questionIds.Except(foundQuestionIds).ToList();
+        if (notFoundIds.Any())
+        {
+            throw new NotFoundException($"Không tìm thấy câu hỏi với ID [{string.Join(", ", notFoundIds)}]");
         }
 
         using (await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, cancellationToken))
         {
-            foreach (var questionRequest in command.QuestionRequests)
+            foreach (var (questionId, updateDto) in command.QuestionUpdates)
             {
-                // Parse string to enum
-                if (!Enum.TryParse<QuestionType>(questionRequest.QuestionType, true, out QuestionType questionType))
+                var existingQuestion = existingQuestions.First(q => q.Id == questionId);
+
+                // Only update properties that are provided (not null)
+                var questionText = updateDto.QuestionText ?? existingQuestion.QuestionText;
+                var questionType = existingQuestion.QuestionType;
+                
+                if (!string.IsNullOrWhiteSpace(updateDto.QuestionType))
                 {
-                    throw new ValidationException($"Loại câu hỏi không hợp lệ: {questionRequest.QuestionType}");
+                    if (!Enum.TryParse<QuestionType>(updateDto.QuestionType, true, out questionType))
+                    {
+                        throw new ValidationException($"Loại câu hỏi không hợp lệ: {updateDto.QuestionType}");
+                    }
                 }
 
-                if (questionRequest.Id.HasValue)
+                var isRequired = updateDto.IsRequired ?? existingQuestion.IsRequired;
+                var questionOrder = updateDto.QuestionOrder ?? existingQuestion.QuestionOrder;
+                var mediaUrl = updateDto.MediaUrl ?? existingQuestion.MediaUrl;
+                var settings = updateDto.Settings ?? existingQuestion.Settings;
+
+                existingQuestion.UpdateQuestion(
+                    questionText,
+                    questionType,
+                    isRequired,
+                    questionOrder,
+                    mediaUrl,
+                    settings
+                );
+
+                // Handle soft delete/activate
+                if (updateDto.IsActive.HasValue)
                 {
-                    // Update existing question (already validated above)
-                    var existingQuestion = await _questionService.GetByIdAsync(questionRequest.Id.Value, cancellationToken);
-                    
-                    existingQuestion.UpdateQuestion(
-                        questionRequest.QuestionText,
-                        questionType,
-                        questionRequest.IsRequired,
-                        questionRequest.QuestionOrder,
-                        questionRequest.MediaUrl ?? string.Empty,
-                        questionRequest.Settings ?? string.Empty
-                    );
-
-                    if (questionRequest.IsActive.HasValue && !questionRequest.IsActive.Value)
+                    if (!updateDto.IsActive.Value)
                     {
-                        existingQuestion.DeactivateQuestion();
+                        existingQuestion.IsDeleted = true;
                     }
-
-                    await _questionService.UpdateAsync(existingQuestion, cancellationToken);
-
-                    // Update choices for existing question
-                    await UpdateQuestionChoices(existingQuestion.Id, questionRequest.Choices, cancellationToken);
+                    else
+                    {
+                        existingQuestion.IsDeleted = false;
+                    }
                 }
-                else
+
+                await _questionService.UpdateAsync(existingQuestion, cancellationToken);
+
+                // Update choices if provided
+                if (updateDto.Choices != null)
                 {
-                    // Create new question (always belongs to the specified poll)
-                    var question = new Domain.Entities.Question(
-                        command.PollId,
-                        questionRequest.QuestionText,
-                        questionType,
-                        questionRequest.IsRequired,
-                        questionRequest.QuestionOrder,
-                        questionRequest.MediaUrl ?? string.Empty,
-                        questionRequest.Settings ?? string.Empty
-                    );
-
-                    await _questionService.AddAsync(question, cancellationToken);
-
-                    // Create choices for new question
-                    if (questionRequest.Choices != null && questionRequest.Choices.Any())
-                    {
-                        foreach (var choiceModel in questionRequest.Choices)
-                        {
-                            var choice = new Domain.Entities.Choice(
-                                question.Id,
-                                choiceModel.ChoiceText,
-                                choiceModel.ChoiceOrder,
-                                choiceModel.IsCorrect,
-                                choiceModel.MediaUrl ?? string.Empty
-                            );
-
-                            await _choiceService.AddAsync(choice, cancellationToken);
-                        }
-                    }
+                    await UpdateQuestionChoices(existingQuestion.Id, updateDto.Choices, cancellationToken);
                 }
             }
 
@@ -216,16 +180,17 @@ internal class UpdateQuestionCommandHandler : ICommandHandler<UpdateQuestionComm
         }
     }
 
-    private async Task UpdateQuestionChoices(Guid questionId, ICollection<ChoiceRequest>? choiceRequests, CancellationToken cancellationToken)
+    private async Task UpdateQuestionChoices(Guid questionId, ICollection<UpdateChoiceDto> choiceUpdates, CancellationToken cancellationToken)
     {
-        if (choiceRequests == null || !choiceRequests.Any())
+        if (!choiceUpdates.Any())
             return;
 
-        // Similar validation needed for choices belonging to the question
-        var existingChoiceIds = choiceRequests
+        var existingChoiceIds = choiceUpdates
             .Where(c => c.Id.HasValue)
             .Select(c => c.Id.Value)
             .ToList();
+
+        Dictionary<Guid, Domain.Entities.Choice> existingChoicesDict = new();
 
         if (existingChoiceIds.Any())
         {
@@ -233,7 +198,6 @@ internal class UpdateQuestionCommandHandler : ICommandHandler<UpdateQuestionComm
                 .Where(c => existingChoiceIds.Contains(c.Id))
                 .ToListAsync(cancellationToken);
 
-            // Check if all existing choices belong to the specified question
             var choicesNotInQuestion = existingChoices
                 .Where(c => c.QuestionId != questionId)
                 .Select(c => c.Id)
@@ -243,40 +207,51 @@ internal class UpdateQuestionCommandHandler : ICommandHandler<UpdateQuestionComm
             {
                 throw new ValidationException($"Các lựa chọn với ID [{string.Join(", ", choicesNotInQuestion)}] không thuộc về câu hỏi {questionId}");
             }
+
+            existingChoicesDict = existingChoices.ToDictionary(c => c.Id, c => c);
         }
 
-        foreach (var choiceModel in choiceRequests)
+        foreach (var choiceUpdate in choiceUpdates)
         {
-            if (choiceModel.Id.HasValue)
+            if (choiceUpdate.Id.HasValue && existingChoicesDict.TryGetValue(choiceUpdate.Id.Value, out var existingChoice))
             {
-                // Update existing choice (already validated above)
-                var existingChoice = await _choiceService.GetByIdAsync(choiceModel.Id.Value, cancellationToken);
-                if (existingChoice != null)
+                // Update existing choice with only provided properties
+                var choiceText = choiceUpdate.ChoiceText ?? existingChoice.ChoiceText;
+                var choiceOrder = choiceUpdate.ChoiceOrder ?? existingChoice.ChoiceOrder;
+                var isCorrect = choiceUpdate.IsCorrect ?? existingChoice.IsCorrect;
+                var mediaUrl = choiceUpdate.MediaUrl ?? existingChoice.MediaUrl;
+
+                existingChoice.UpdateChoice(choiceText, choiceOrder, isCorrect, mediaUrl);
+
+                // Handle soft delete/activate
+                if (choiceUpdate.IsActive.HasValue)
                 {
-                    existingChoice.UpdateChoice(
-                        choiceModel.ChoiceText,
-                        choiceModel.ChoiceOrder,
-                        choiceModel.IsCorrect,
-                        choiceModel.MediaUrl ?? string.Empty
-                    );
-
-                    if (choiceModel.IsActive.HasValue && !choiceModel.IsActive.Value)
+                    if (!choiceUpdate.IsActive.Value)
                     {
-                        existingChoice.DeactivateChoice();
+                        existingChoice.IsDeleted = true;
                     }
-
-                    await _choiceService.UpdateAsync(existingChoice, cancellationToken);
+                    else
+                    {
+                        existingChoice.IsDeleted = false;
+                    }
                 }
+
+                await _choiceService.UpdateAsync(existingChoice, cancellationToken);
             }
-            else
+            else if (!choiceUpdate.Id.HasValue)
             {
-                // Create new choice (always belongs to the specified question)
+                // Create new choice - all required properties must be provided
+                if (string.IsNullOrWhiteSpace(choiceUpdate.ChoiceText))
+                {
+                    throw new ValidationException("ChoiceText is required for new choices");
+                }
+
                 var newChoice = new Domain.Entities.Choice(
                     questionId,
-                    choiceModel.ChoiceText,
-                    choiceModel.ChoiceOrder,
-                    choiceModel.IsCorrect,
-                    choiceModel.MediaUrl ?? string.Empty
+                    choiceUpdate.ChoiceText,
+                    choiceUpdate.ChoiceOrder ?? 0,
+                    choiceUpdate.IsCorrect ?? false,
+                    choiceUpdate.MediaUrl ?? string.Empty
                 );
 
                 await _choiceService.AddAsync(newChoice, cancellationToken);
