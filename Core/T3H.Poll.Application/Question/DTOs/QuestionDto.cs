@@ -35,7 +35,7 @@ public class UpdateQuestionDto
 
 public class UpdateChoiceDto
 {
-    public Guid? Id { get; set; } // Null for new choices, existing ID for updates
+    public string? Id { get; set; } 
     public string? ChoiceText { get; set; }
     public int? ChoiceOrder { get; set; }
     public bool? IsCorrect { get; set; }

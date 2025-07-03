@@ -103,4 +103,32 @@ public class QuestionService : CrudService<Domain.Entities.Question>, IQuestionS
             await UpdateAsync(question, cancellationToken);
         }
     }
+    
+    public async Task<int> GetNextQuestionOrderAsync(Guid pollId, CancellationToken cancellationToken = default)
+    {
+        var maxOrder = await GetQueryableSet()
+            .Where(q => q.PollId == pollId && q.IsDeleted != true)
+            .MaxAsync(q => (int?)q.QuestionOrder, cancellationToken);
+    
+        return (maxOrder ?? 0) + 1;
+    }
+
+    public async Task<bool> IsQuestionOrderExistsAsync(Guid pollId, int questionOrder, CancellationToken cancellationToken = default)
+    {
+        return await GetQueryableSet()
+            .AnyAsync(q => q.PollId == pollId && q.QuestionOrder == questionOrder && q.IsDeleted != true, cancellationToken);
+    }
+    
+    public async Task<bool> IsQuestionOrderExistsAsync(Guid pollId, int questionOrder, Guid? excludeQuestionId = null, CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryableSet()
+            .Where(q => q.PollId == pollId && q.QuestionOrder == questionOrder && q.IsDeleted != true);
+
+        if (excludeQuestionId.HasValue)
+        {
+            query = query.Where(q => q.Id != excludeQuestionId.Value);
+        }
+
+        return await query.AnyAsync(cancellationToken);
+    }
 }
