@@ -32,6 +32,7 @@ public static class PersistenceExtensions
             .AddScoped(typeof(IPollRepository), typeof(PollRepository))
             .AddScoped(typeof(IQuestionRepository), typeof(QuestionRepository))
             .AddScoped(typeof(IChoiceRepository), typeof(ChoiceRepository))
+            // .AddScoped(typeof(IPollSubmissionRepository), typeof(PollSubmissionRepository))
             ;
 
         services.AddScoped(typeof(IUnitOfWork), services =>

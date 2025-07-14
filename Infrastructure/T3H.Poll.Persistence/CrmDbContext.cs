@@ -22,6 +22,9 @@ public class CrmDbContext : DbContext, IUnitOfWork, IDataProtectionKeyContext
     public DbSet<Domain.Entities.Poll> Polls { get; set; }
     public DbSet<PollAnalytics> PollAnalytics { get; set; }
     public DbSet<PollInvitation> PollInvitations { get; set; }
+    public DbSet<PollSubmission> PollSubmissions { get; set; }
+    public DbSet<PollAnswer> PollAnswers { get; set; }
+    public DbSet<PollAnswerChoice> PollAnswerChoices { get; set; }
     public DbSet<VoteDetail> VoteDetails { get; set; }
     public DbSet<VotingHistory> VotingHistories { get; set; }
 

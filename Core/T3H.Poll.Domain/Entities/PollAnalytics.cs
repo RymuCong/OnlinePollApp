@@ -3,7 +3,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-public class PollAnalytics : Entity<Guid>
+public class PollAnalytics : Entity<Guid>, IAggregateRoot
 {
     [Required]
     public Guid PollId { get; set; }
