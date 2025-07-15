@@ -30,8 +30,11 @@ public class HandlerFactory
             var attribute = attributes[i];
             var attributeType = attribute.GetType();
             Type decoratorHandlerType = null;
-            var hasDecoratorHandler = type.HasInterface(typeof(ICommandHandler<>)) && Mappings.AttributeToCommandHandler.TryGetValue(attributeType, out decoratorHandlerType)
-            || type.HasInterface(typeof(IQueryHandler<,>)) && Mappings.AttributeToQueryHandler.TryGetValue(attributeType, out decoratorHandlerType);
+            
+            // Support both ICommandHandler<> and ICommandHandler<,> (with return value)
+            var hasDecoratorHandler = (type.HasInterface(typeof(ICommandHandler<>)) || type.HasInterface(typeof(ICommandHandler<,>))) 
+                && Mappings.AttributeToCommandHandler.TryGetValue(attributeType, out decoratorHandlerType)
+                || type.HasInterface(typeof(IQueryHandler<,>)) && Mappings.AttributeToQueryHandler.TryGetValue(attributeType, out decoratorHandlerType);
 
             if (!hasDecoratorHandler)
             {

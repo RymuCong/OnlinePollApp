@@ -54,7 +54,7 @@ public class SearchPublicPollsQuery : BaseSearchQuery<Domain.Entities.Poll, Publ
 
     public override IQueryable<Domain.Entities.Poll> AddIncludes(IQueryable<Domain.Entities.Poll> query)
     {
-        return query;
+        return query.Include(p => p.Questions);
     }
 
     public override IOrderedQueryable<Domain.Entities.Poll> ApplySort(
@@ -104,8 +104,8 @@ public class SearchPublicPollsQueryHandler : BaseSearchQueryHandler<Domain.Entit
             };
         }
 
-        // Add filter for public polls only
-        baseQuery = baseQuery.Where(p => p.IsPublic && p.IsActive);
+        // Add filters for public polls that have questions
+        baseQuery = baseQuery.Where(p => p.IsPublic && p.IsActive && p.Questions.Any());
 
         // Get total count for pagination metadata
         var totalItems = await baseQuery.CountAsync(cancellationToken);

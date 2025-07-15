@@ -34,6 +34,18 @@ public class Dispatcher
         dynamic handler = _provider.GetService(handlerType);
         await handler.HandleAsync((dynamic)command, cancellationToken);
     }
+    
+    public async Task<T> DispatchAsync<T>(ICommand<T> command, CancellationToken cancellationToken = default)
+    {
+        Type type = typeof(ICommandHandler<,>);
+        Type[] typeArgs = { command.GetType(), typeof(T) };
+        Type handlerType = type.MakeGenericType(typeArgs);
+
+        dynamic handler = _provider.GetService(handlerType);
+        Task<T> result = handler.HandleAsync((dynamic)command, cancellationToken);
+
+        return await result;
+    }
 
     public async Task<T> DispatchAsync<T>(IQuery<T> query, CancellationToken cancellationToken = default)
     {
